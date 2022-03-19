@@ -9,8 +9,8 @@ The implemented rust code is still WIP.
 
 TODO:
 
-- [ ]: Change turtlebot controls to continious control
-- [ ]: Add gyroscope control
+- [ ] Change turtlebot controls to continious control
+- [ ] Add gyroscope control
 
 ## flutter_rust_bridge specific stuff for future reference
 
