@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package teleop;
+
+message Vector3 {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message CommandRequest {
+  Vector3 linear = 1;
+  Vector3 angular = 2;
+}
+
+message CommandAck { bool success = 1; }
+
+service Teleop { rpc SendCommand(CommandRequest) returns (CommandAck); }

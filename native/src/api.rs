@@ -1,34 +1,33 @@
-pub enum Platform {
-    Unknown,
-    Android,
-    Ios,
-    Windows,
-    Unix,
-    MacIntel,
-    MacApple,
-    Wasm,
+use zenoh::prelude::ZFuture;
+
+pub struct Handler {
+    zenoh_session: zenoh::Session,
 }
 
-pub fn platform() -> Platform {
-    if cfg!(windows) {
-        Platform::Windows
-    } else if cfg!(target_os = "android") {
-        Platform::Android
-    } else if cfg!(target_os = "ios") {
-        Platform::Ios
-    } else if cfg!(target_arch = "aarch64-apple-darwin") {
-        Platform::MacApple
-    } else if cfg!(target_os = "macos") {
-        Platform::MacIntel
-    } else if cfg!(target_family = "wasm") {
-        Platform::Wasm
-    } else if cfg!(unix) {
-        Platform::Unix
-    } else {
-        Platform::Unknown
+pub struct Twist {
+    linear: Vector3,
+    angular: Vector3,
+}
+
+struct Vector3 {
+    x: f32,
+    y: f32,
+    z: f32,
+}
+
+impl Handler {
+    pub fn new() -> Handler {
+        let config = zenoh::config::default();
+        let zenoh_session = zenoh::open(config).wait().unwrap();
+
+        Handler { zenoh_session }
     }
-}
-
-pub fn rust_release_mode() -> bool {
-    cfg!(not(debug_assertions))
+    /*
+    pub async fn put(&self, value: Twist) {
+        let workspace = self
+            .zenoh_session
+            .put(&"/rt/cmd_vel".try_into().unwrap(), value)
+            .await
+            .unwrap();
+    }*/
 }

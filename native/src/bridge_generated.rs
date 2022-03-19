@@ -16,31 +16,11 @@ use flutter_rust_bridge::*;
 
 // Section: wire functions
 
-#[no_mangle]
-pub extern "C" fn wire_platform(port_: i64) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "platform",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || move |task_callback| Ok(platform()),
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_rust_release_mode(port_: i64) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "rust_release_mode",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || move |task_callback| Ok(rust_release_mode()),
-    )
-}
-
 // Section: wire structs
+
+// Section: wrapper structs
+
+// Section: static checks
 
 // Section: allocate functions
 
@@ -76,22 +56,6 @@ impl<T> NewWithNullPtr for *mut T {
 }
 
 // Section: impl IntoDart
-
-impl support::IntoDart for Platform {
-    fn into_dart(self) -> support::DartCObject {
-        match self {
-            Self::Unknown => 0,
-            Self::Android => 1,
-            Self::Ios => 2,
-            Self::Windows => 3,
-            Self::Unix => 4,
-            Self::MacIntel => 5,
-            Self::MacApple => 6,
-            Self::Wasm => 7,
-        }
-        .into_dart()
-    }
-}
 
 // Section: executor
 

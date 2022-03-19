@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'ffi.dart';
+import 'package:grpc/grpc.dart';
+import 'package:robot_control/teleop_client_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Teleop Turtlebot',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -23,9 +24,9 @@ class MyApp extends StatelessWidget {
         // or simply save your changes to "hot reload" in a Flutter IDE).
         // Notice that the counter didn't reset back to zero; the application
         // is not restarted.
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.lime,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Teleop Turtlebot'),
     );
   }
 }
@@ -49,15 +50,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  late Future<Platform> platform;
-  late Future<bool> isRelease;
+  TeleopClientHandler handler = TeleopClientHandler('127.0.0.1',
+      const ChannelCredentials.insecure(), const Duration(minutes: 1));
 
-  @override
-  void initState() {
-    super.initState();
-    platform = api.platform();
-    isRelease = api.rustReleaseMode();
-  }
+  final SizedBox _box = const SizedBox(
+    height: 5,
+    width: 5,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -93,40 +92,37 @@ class _MyHomePageState extends State<MyHomePage> {
           // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text("You're running on"),
-            FutureBuilder<List<dynamic>>(
-              future: Future.wait([platform, isRelease]),
-              builder: (context, snap) {
-                final style = Theme.of(context).textTheme.headline4;
-                if (snap.error != null) {
-                  debugPrint(snap.error.toString());
-                  return Tooltip(
-                    message: snap.error.toString(),
-                    child: Text('Unknown OS', style: style),
-                  );
-                }
-
-                final data = snap.data;
-                if (data == null) return const CircularProgressIndicator();
-
-                final Platform platform = data[0];
-                final release = data[1] ? 'Release' : 'Debug';
-                final text = const {
-                      Platform.Android: 'Android',
-                      Platform.Ios: 'iOS',
-                      Platform.MacApple: 'MacOS with Apple Silicon',
-                      Platform.MacIntel: 'MacOS',
-                      Platform.Windows: 'Windows',
-                      Platform.Unix: 'Unix',
-                      Platform.Wasm: 'the Web',
-                    }[platform] ??
-                    'Unknown OS';
-                return Text(text + ' ($release)', style: style);
-              },
-            )
+            ElevatedButton(
+              onPressed: () async => handler.accelerate(),
+              child: const Icon(Icons.arrow_upward),
+            ),
+            _box,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () async => handler.leftwards(),
+                  child: const Icon(Icons.arrow_back),
+                ),
+                _box,
+                ElevatedButton(
+                    onPressed: () async => handler.stop(),
+                    child: const Icon(Icons.cancel_outlined)),
+                _box,
+                ElevatedButton(
+                    onPressed: () async => handler.rightwards(),
+                    child: const Icon(Icons.arrow_forward))
+              ],
+            ),
+            _box,
+            ElevatedButton(
+              onPressed: () async => handler.decelerate(),
+              child: const Icon(Icons.arrow_downward),
+            ),
+            _box,
           ],
         ),
-      ),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
