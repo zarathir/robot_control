@@ -9,7 +9,7 @@ import 'bridge_generated.dart';
 export 'bridge_generated.dart';
 import 'dart:io' as io;
 
-const _base = 'native';
+const _base = 'zenoh_client';
 
 // On MacOS, the dynamic library is not bundled with the binary,
 // but rather directly **linked** against the binary.
@@ -17,6 +17,7 @@ final _dylib = io.Platform.isWindows ? '$_base.dll' : 'lib$_base.so';
 
 // The late modifier delays initializing the value until it is actually needed,
 // leaving precious little time for the program to quickly start up.
-late final Native api = NativeImpl(io.Platform.isIOS || io.Platform.isMacOS
-    ? DynamicLibrary.executable()
-    : DynamicLibrary.open(_dylib));
+late final ZenohClient api = ZenohClientImpl(
+    io.Platform.isIOS || io.Platform.isMacOS
+        ? DynamicLibrary.executable()
+        : DynamicLibrary.open(_dylib));

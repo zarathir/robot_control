@@ -11,6 +11,7 @@ TODO:
 
 - [ ] Change turtlebot controls to continious control
 - [ ] Add gyroscope control
+- [ ] Add rust interface similar to [Zenoh](https://github.com/atolab/zenoh-demo/tree/main/ROS2/zenoh-rust-teleop)
 
 ## flutter_rust_bridge specific stuff for future reference
 

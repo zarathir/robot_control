@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:grpc/grpc.dart';
+import 'package:robot_control/ffi.dart';
 
 import 'models/teleop.pbgrpc.dart';
 
@@ -70,6 +71,10 @@ class TeleopClientHandler {
 
     try {
       stub.sendCommand(CommandRequest(linear: linear, angular: angular));
+      api.pubTwist(
+          cmdKey: "/rt/cmd_vel",
+          linear: controlLinearVel,
+          angular: controlAngularVel);
     } catch (e) {
       rethrow;
     }

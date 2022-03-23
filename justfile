@@ -10,7 +10,7 @@ default: gen lint
 
 gen:
     flutter_rust_bridge_codegen {{llvm_path}} \
-        --rust-input native/src/api.rs \
+        --rust-input zenoh_client/src/api.rs \
         --dart-output lib/bridge_generated.dart \
         --c-output ios/Runner/bridge_generated.h
     cp ios/Runner/bridge_generated.h macos/Runner/bridge_generated.h
@@ -18,11 +18,11 @@ gen:
     flutter pub run build_runner build
 
 lint:
-    cd native && cargo fmt
+    cd zenoh_client && cargo fmt
     dart format .
 
 clean:
     flutter clean
-    cd native && cargo clean
+    cd zenoh_client && cargo clean
 
 # vim:expandtab:sw=4:ts=4
