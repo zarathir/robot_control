@@ -10,18 +10,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
     - name: Build
+      uses: actions/checkout@v3
       run: |
         cd zenoh_client
         cargo build --verbose
+
     - name: Run tests
       run: |
         cd zenoh_client
         cargo test --verbose
+
     - name: Build flutter app
-    - uses: actions/checkout@v3
-    - uses: subosito/flutter-action@v2
+      uses: actions/checkout@v3
+      uses: subosito/flutter-action@v2
       with:
         channel: 'stable'
     - run: |
