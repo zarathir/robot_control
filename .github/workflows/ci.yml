@@ -37,4 +37,5 @@ jobs:
       - name: Run tests
         uses: actions-rs/cargo@v1
         with:
+          path: zenoh_client/
           command: test
