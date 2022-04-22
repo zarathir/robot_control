@@ -7,9 +7,19 @@ on:
     branches: [ main ]
 
 jobs:
- build:
+  build:
    runs-on: ubuntu-latest
-   steps:
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build
+      run: |
+        cd zenoh_client
+        cargo build --verbose
+    - name: Run tests
+      run: |
+        cd zenoh_client
+        cargo test --verbose
+    steps:
      - uses: actions/checkout@v3
      - uses: subosito/flutter-action@v2
        with:
