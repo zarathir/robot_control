@@ -7,27 +7,15 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Build
-      uses: actions/checkout@v3
-      run: |
-        cd zenoh_client
-        cargo build --verbose
-
-    - name: Run tests
-      run: |
-        cd zenoh_client
-        cargo test --verbose
-
-    - name: Build flutter app
-      uses: actions/checkout@v3
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-    - run: |
+ build:
+   runs-on: ubuntu-latest
+   steps:
+     - uses: actions/checkout@v3
+     - uses: subosito/flutter-action@v2
+       with:
+         channel: 'stable'
+     - run: |
         sudo apt-get update -y
         sudo apt-get install -y ninja-build libgtk-3-dev
-    - run: flutter config --enable-linux-desktop
-    - run: flutter build linux
+     - run: flutter config --enable-linux-desktop
+     - run: flutter build linux
