@@ -17,28 +17,55 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_pub_twist(
-    port_: i64,
-    cmd_key: *mut wire_uint_8_list,
-    linear: f64,
-    angular: f64,
-) {
+pub extern "C" fn wire_node_handle(port_: i64, cmd_key: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "pub_twist",
+            debug_name: "node_handle",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
         move || {
             let api_cmd_key = cmd_key.wire2api();
-            let api_linear = linear.wire2api();
-            let api_angular = angular.wire2api();
-            move |task_callback| Ok(pub_twist(api_cmd_key, api_linear, api_angular))
+            move |task_callback| Ok(node_handle(api_cmd_key))
         },
     )
 }
 
+#[no_mangle]
+pub extern "C" fn wire_publish_message(port_: i64, data: *mut wire_OptionTwist) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "publish_message",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || {
+            let api_data = data.wire2api();
+            move |task_callback| Ok(publish_message(api_data))
+        },
+    )
+}
+
+#[no_mangle]
+pub extern "C" fn wire_shutdown(port_: i64) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
+        WrapInfo {
+            debug_name: "shutdown",
+            port: Some(port_),
+            mode: FfiCallMode::Normal,
+        },
+        move || move |task_callback| Ok(shutdown()),
+    )
+}
+
 // Section: wire structs
+
+#[repr(C)]
+#[derive(Clone)]
+pub struct wire_OptionTwist {
+    linear: *mut wire_Vec3,
+    angular: *mut wire_Vec3,
+}
 
 #[repr(C)]
 #[derive(Clone)]
@@ -47,11 +74,29 @@ pub struct wire_uint_8_list {
     len: i32,
 }
 
+#[repr(C)]
+#[derive(Clone)]
+pub struct wire_Vec3 {
+    x: f64,
+    y: f64,
+    z: f64,
+}
+
 // Section: wrapper structs
 
 // Section: static checks
 
 // Section: allocate functions
+
+#[no_mangle]
+pub extern "C" fn new_box_autoadd_option_twist() -> *mut wire_OptionTwist {
+    support::new_leak_box_ptr(wire_OptionTwist::new_with_null_ptr())
+}
+
+#[no_mangle]
+pub extern "C" fn new_box_autoadd_vec_3() -> *mut wire_Vec3 {
+    support::new_leak_box_ptr(wire_Vec3::new_with_null_ptr())
+}
 
 #[no_mangle]
 pub extern "C" fn new_uint_8_list(len: i32) -> *mut wire_uint_8_list {
@@ -88,9 +133,32 @@ impl Wire2Api<String> for *mut wire_uint_8_list {
     }
 }
 
+impl Wire2Api<OptionTwist> for *mut wire_OptionTwist {
+    fn wire2api(self) -> OptionTwist {
+        let wrap = unsafe { support::box_from_leak_ptr(self) };
+        (*wrap).wire2api().into()
+    }
+}
+
+impl Wire2Api<Vec3> for *mut wire_Vec3 {
+    fn wire2api(self) -> Vec3 {
+        let wrap = unsafe { support::box_from_leak_ptr(self) };
+        (*wrap).wire2api().into()
+    }
+}
+
 impl Wire2Api<f64> for f64 {
     fn wire2api(self) -> f64 {
         self
+    }
+}
+
+impl Wire2Api<OptionTwist> for wire_OptionTwist {
+    fn wire2api(self) -> OptionTwist {
+        OptionTwist {
+            linear: self.linear.wire2api(),
+            angular: self.angular.wire2api(),
+        }
     }
 }
 
@@ -109,6 +177,16 @@ impl Wire2Api<Vec<u8>> for *mut wire_uint_8_list {
     }
 }
 
+impl Wire2Api<Vec3> for wire_Vec3 {
+    fn wire2api(self) -> Vec3 {
+        Vec3 {
+            x: self.x.wire2api(),
+            y: self.y.wire2api(),
+            z: self.z.wire2api(),
+        }
+    }
+}
+
 // Section: impl NewWithNullPtr
 
 pub trait NewWithNullPtr {
@@ -118,6 +196,25 @@ pub trait NewWithNullPtr {
 impl<T> NewWithNullPtr for *mut T {
     fn new_with_null_ptr() -> Self {
         std::ptr::null_mut()
+    }
+}
+
+impl NewWithNullPtr for wire_OptionTwist {
+    fn new_with_null_ptr() -> Self {
+        Self {
+            linear: core::ptr::null_mut(),
+            angular: core::ptr::null_mut(),
+        }
+    }
+}
+
+impl NewWithNullPtr for wire_Vec3 {
+    fn new_with_null_ptr() -> Self {
+        Self {
+            x: Default::default(),
+            y: Default::default(),
+            z: Default::default(),
+        }
     }
 }
 

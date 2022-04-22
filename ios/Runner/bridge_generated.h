@@ -7,6 +7,17 @@ typedef struct wire_uint_8_list {
   int32_t len;
 } wire_uint_8_list;
 
+typedef struct wire_Vec3 {
+  double x;
+  double y;
+  double z;
+} wire_Vec3;
+
+typedef struct wire_OptionTwist {
+  struct wire_Vec3 *linear;
+  struct wire_Vec3 *angular;
+} wire_OptionTwist;
+
 typedef struct WireSyncReturnStruct {
   uint8_t *ptr;
   int32_t len;
@@ -17,7 +28,15 @@ typedef int64_t DartPort;
 
 typedef bool (*DartPostCObjectFnType)(DartPort port_id, void *message);
 
-void wire_pub_twist(int64_t port_, struct wire_uint_8_list *cmd_key, double linear, double angular);
+void wire_node_handle(int64_t port_, struct wire_uint_8_list *cmd_key);
+
+void wire_publish_message(int64_t port_, struct wire_OptionTwist *data);
+
+void wire_shutdown(int64_t port_);
+
+struct wire_OptionTwist *new_box_autoadd_option_twist(void);
+
+struct wire_Vec3 *new_box_autoadd_vec_3(void);
 
 struct wire_uint_8_list *new_uint_8_list(int32_t len);
 
@@ -27,7 +46,11 @@ void store_dart_post_cobject(DartPostCObjectFnType ptr);
 
 static int64_t dummy_method_to_enforce_bundling(void) {
     int64_t dummy_var = 0;
-    dummy_var ^= ((int64_t) (void*) wire_pub_twist);
+    dummy_var ^= ((int64_t) (void*) wire_node_handle);
+    dummy_var ^= ((int64_t) (void*) wire_publish_message);
+    dummy_var ^= ((int64_t) (void*) wire_shutdown);
+    dummy_var ^= ((int64_t) (void*) new_box_autoadd_option_twist);
+    dummy_var ^= ((int64_t) (void*) new_box_autoadd_vec_3);
     dummy_var ^= ((int64_t) (void*) new_uint_8_list);
     dummy_var ^= ((int64_t) (void*) free_WireSyncReturnStruct);
     dummy_var ^= ((int64_t) (void*) store_dart_post_cobject);

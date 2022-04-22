@@ -4,6 +4,14 @@
 # Once done, uncomment this line:
 find_package(Corrosion REQUIRED)
 
+#include(FetchContent)
+
+#FetchContent_Declare(
+#    Corrosion
+#    GIT_REPOSITORY https://github.com/AndrewGaspar/corrosion.git
+#    GIT_TAG origin/master # Optionally specify a version tag or branch here
+#)
+
 corrosion_import_crate(MANIFEST_PATH ../zenoh_client/Cargo.toml)
 
 # Flutter-specific

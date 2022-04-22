@@ -9,6 +9,7 @@ llvm_path := if os() == "macos" {
 default: gen lint
 
 gen:
+    flutter pub get
     flutter_rust_bridge_codegen {{llvm_path}} \
         --rust-input zenoh_client/src/api.rs \
         --dart-output lib/bridge_generated.dart \

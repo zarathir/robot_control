@@ -12,11 +12,33 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'dart:ffi' as ffi;
 
 abstract class ZenohClient {
-  Future<void> pubTwist(
-      {required String cmdKey,
-      required double linear,
-      required double angular,
-      dynamic hint});
+  Future<void> nodeHandle({required String cmdKey, dynamic hint});
+
+  Future<void> publishMessage({required OptionTwist data, dynamic hint});
+
+  Future<void> shutdown({dynamic hint});
+}
+
+class OptionTwist {
+  final Vec3? linear;
+  final Vec3? angular;
+
+  OptionTwist({
+    this.linear,
+    this.angular,
+  });
+}
+
+class Vec3 {
+  final double x;
+  final double y;
+  final double z;
+
+  Vec3({
+    required this.x,
+    required this.y,
+    required this.z,
+  });
 }
 
 class ZenohClientImpl extends FlutterRustBridgeBase<ZenohClientWire>
@@ -26,23 +48,40 @@ class ZenohClientImpl extends FlutterRustBridgeBase<ZenohClientWire>
 
   ZenohClientImpl.raw(ZenohClientWire inner) : super(inner);
 
-  Future<void> pubTwist(
-          {required String cmdKey,
-          required double linear,
-          required double angular,
-          dynamic hint}) =>
+  Future<void> nodeHandle({required String cmdKey, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_pub_twist(
-            port_,
-            _api2wire_String(cmdKey),
-            _api2wire_f64(linear),
-            _api2wire_f64(angular)),
+        callFfi: (port_) =>
+            inner.wire_node_handle(port_, _api2wire_String(cmdKey)),
         parseSuccessData: _wire2api_unit,
         constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "pub_twist",
-          argNames: ["cmdKey", "linear", "angular"],
+          debugName: "node_handle",
+          argNames: ["cmdKey"],
         ),
-        argValues: [cmdKey, linear, angular],
+        argValues: [cmdKey],
+        hint: hint,
+      ));
+
+  Future<void> publishMessage({required OptionTwist data, dynamic hint}) =>
+      executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_publish_message(
+            port_, _api2wire_box_autoadd_option_twist(data)),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "publish_message",
+          argNames: ["data"],
+        ),
+        argValues: [data],
+        hint: hint,
+      ));
+
+  Future<void> shutdown({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
+        callFfi: (port_) => inner.wire_shutdown(port_),
+        parseSuccessData: _wire2api_unit,
+        constMeta: const FlutterRustBridgeTaskConstMeta(
+          debugName: "shutdown",
+          argNames: [],
+        ),
+        argValues: [],
         hint: hint,
       ));
 
@@ -51,8 +90,25 @@ class ZenohClientImpl extends FlutterRustBridgeBase<ZenohClientWire>
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
   }
 
+  ffi.Pointer<wire_OptionTwist> _api2wire_box_autoadd_option_twist(
+      OptionTwist raw) {
+    final ptr = inner.new_box_autoadd_option_twist();
+    _api_fill_to_wire_option_twist(raw, ptr.ref);
+    return ptr;
+  }
+
+  ffi.Pointer<wire_Vec3> _api2wire_box_autoadd_vec_3(Vec3 raw) {
+    final ptr = inner.new_box_autoadd_vec_3();
+    _api_fill_to_wire_vec_3(raw, ptr.ref);
+    return ptr;
+  }
+
   double _api2wire_f64(double raw) {
     return raw;
+  }
+
+  ffi.Pointer<wire_Vec3> _api2wire_opt_box_autoadd_vec_3(Vec3? raw) {
+    return raw == null ? ffi.nullptr : _api2wire_box_autoadd_vec_3(raw);
   }
 
   int _api2wire_u8(int raw) {
@@ -67,6 +123,32 @@ class ZenohClientImpl extends FlutterRustBridgeBase<ZenohClientWire>
 
   // Section: api_fill_to_wire
 
+  void _api_fill_to_wire_box_autoadd_option_twist(
+      OptionTwist apiObj, ffi.Pointer<wire_OptionTwist> wireObj) {
+    _api_fill_to_wire_option_twist(apiObj, wireObj.ref);
+  }
+
+  void _api_fill_to_wire_box_autoadd_vec_3(
+      Vec3 apiObj, ffi.Pointer<wire_Vec3> wireObj) {
+    _api_fill_to_wire_vec_3(apiObj, wireObj.ref);
+  }
+
+  void _api_fill_to_wire_opt_box_autoadd_vec_3(
+      Vec3? apiObj, ffi.Pointer<wire_Vec3> wireObj) {
+    if (apiObj != null) _api_fill_to_wire_box_autoadd_vec_3(apiObj, wireObj);
+  }
+
+  void _api_fill_to_wire_option_twist(
+      OptionTwist apiObj, wire_OptionTwist wireObj) {
+    wireObj.linear = _api2wire_opt_box_autoadd_vec_3(apiObj.linear);
+    wireObj.angular = _api2wire_opt_box_autoadd_vec_3(apiObj.angular);
+  }
+
+  void _api_fill_to_wire_vec_3(Vec3 apiObj, wire_Vec3 wireObj) {
+    wireObj.x = _api2wire_f64(apiObj.x);
+    wireObj.y = _api2wire_f64(apiObj.y);
+    wireObj.z = _api2wire_f64(apiObj.z);
+  }
 }
 
 // Section: wire2api
@@ -96,26 +178,73 @@ class ZenohClientWire implements FlutterRustBridgeWireBase {
           lookup)
       : _lookup = lookup;
 
-  void wire_pub_twist(
+  void wire_node_handle(
     int port_,
     ffi.Pointer<wire_uint_8_list> cmd_key,
-    double linear,
-    double angular,
   ) {
-    return _wire_pub_twist(
+    return _wire_node_handle(
       port_,
       cmd_key,
-      linear,
-      angular,
     );
   }
 
-  late final _wire_pub_twistPtr = _lookup<
+  late final _wire_node_handlePtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
-              ffi.Double, ffi.Double)>>('wire_pub_twist');
-  late final _wire_pub_twist = _wire_pub_twistPtr.asFunction<
-      void Function(int, ffi.Pointer<wire_uint_8_list>, double, double)>();
+          ffi.Void Function(
+              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_node_handle');
+  late final _wire_node_handle = _wire_node_handlePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
+
+  void wire_publish_message(
+    int port_,
+    ffi.Pointer<wire_OptionTwist> data,
+  ) {
+    return _wire_publish_message(
+      port_,
+      data,
+    );
+  }
+
+  late final _wire_publish_messagePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Int64,
+              ffi.Pointer<wire_OptionTwist>)>>('wire_publish_message');
+  late final _wire_publish_message = _wire_publish_messagePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_OptionTwist>)>();
+
+  void wire_shutdown(
+    int port_,
+  ) {
+    return _wire_shutdown(
+      port_,
+    );
+  }
+
+  late final _wire_shutdownPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
+          'wire_shutdown');
+  late final _wire_shutdown =
+      _wire_shutdownPtr.asFunction<void Function(int)>();
+
+  ffi.Pointer<wire_OptionTwist> new_box_autoadd_option_twist() {
+    return _new_box_autoadd_option_twist();
+  }
+
+  late final _new_box_autoadd_option_twistPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<wire_OptionTwist> Function()>>(
+          'new_box_autoadd_option_twist');
+  late final _new_box_autoadd_option_twist = _new_box_autoadd_option_twistPtr
+      .asFunction<ffi.Pointer<wire_OptionTwist> Function()>();
+
+  ffi.Pointer<wire_Vec3> new_box_autoadd_vec_3() {
+    return _new_box_autoadd_vec_3();
+  }
+
+  late final _new_box_autoadd_vec_3Ptr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<wire_Vec3> Function()>>(
+          'new_box_autoadd_vec_3');
+  late final _new_box_autoadd_vec_3 =
+      _new_box_autoadd_vec_3Ptr.asFunction<ffi.Pointer<wire_Vec3> Function()>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,
@@ -166,6 +295,23 @@ class wire_uint_8_list extends ffi.Struct {
 
   @ffi.Int32()
   external int len;
+}
+
+class wire_Vec3 extends ffi.Struct {
+  @ffi.Double()
+  external double x;
+
+  @ffi.Double()
+  external double y;
+
+  @ffi.Double()
+  external double z;
+}
+
+class wire_OptionTwist extends ffi.Struct {
+  external ffi.Pointer<wire_Vec3> linear;
+
+  external ffi.Pointer<wire_Vec3> angular;
 }
 
 typedef DartPostCObjectFnType = ffi.Pointer<

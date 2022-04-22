@@ -71,10 +71,6 @@ class TeleopClientHandler {
 
     try {
       stub.sendCommand(CommandRequest(linear: linear, angular: angular));
-      api.pubTwist(
-          cmdKey: "/rt/cmd_vel",
-          linear: controlLinearVel,
-          angular: controlAngularVel);
     } catch (e) {
       rethrow;
     }
