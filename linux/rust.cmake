@@ -12,6 +12,8 @@ FetchContent_Declare(
     GIT_TAG origin/master # Optionally specify a version tag or branch here
 )
 
+FetchContent_MakeAvailable(Corrosion)
+
 corrosion_import_crate(MANIFEST_PATH ../zenoh_client/Cargo.toml)
 
 # Flutter-specific
