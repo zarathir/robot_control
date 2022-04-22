@@ -35,7 +35,7 @@ jobs:
           toolchain: stable
           override: true
       - name: Run tests
+        run: cd zenoh_client
         uses: actions-rs/cargo@v1
         with:
-          path: zenoh_client/
           command: test
