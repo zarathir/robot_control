@@ -63,35 +63,35 @@ class TeleopClientHandler {
 
     var twist = OptionTwist(linear: linear, angular: angular);
 
-    api.publishMessage(data: twist);
+    await api.publishMessage(data: twist);
   }
 
   Future<void> accelerate() async {
     targetLinearVel =
         _checkLinearLimitVelocity(targetLinearVel + linearVelStepSize);
 
-    _sendCommand();
+    await _sendCommand();
   }
 
   Future<void> decelerate() async {
     targetLinearVel =
         _checkLinearLimitVelocity(targetLinearVel - linearVelStepSize);
 
-    _sendCommand();
+    await _sendCommand();
   }
 
   Future<void> leftwards() async {
     targetAngularVel =
         _checkAngualarLimitVelocity(targetAngularVel + angularVelStepSize);
 
-    _sendCommand();
+    await _sendCommand();
   }
 
   Future<void> rightwards() async {
     targetAngularVel =
         _checkAngualarLimitVelocity(targetAngularVel - angularVelStepSize);
 
-    _sendCommand();
+    await _sendCommand();
   }
 
   Future<void> stop() async {
@@ -100,6 +100,6 @@ class TeleopClientHandler {
     targetAngularVel = 0;
     controlAngularVel = 0;
 
-    _sendCommand();
+    await _sendCommand();
   }
 }
