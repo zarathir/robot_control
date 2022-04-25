@@ -3,8 +3,6 @@ name: CI - Rust
 on:
   push:
     branches: [ rust-dev ]
-  pull_request:
-    branches: [ rust-dev ]
 
 env:
   CARGO_TERM_COLOR: always
