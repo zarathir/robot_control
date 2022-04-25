@@ -86,9 +86,9 @@ mod tests {
     use std::thread;
 
     use super::{node_handle, publish_message, OptionTwist, Twist, Vec3};
-    use futures::{executor, StreamExt};
+    use futures::StreamExt;
     use rand::{thread_rng, Rng};
-    use zenoh::{prelude::ZFuture, Session};
+    use zenoh::prelude::SplitBuffer;
 
     fn create_test_data() -> OptionTwist {
         let mut rng = thread_rng();
@@ -111,15 +111,11 @@ mod tests {
         }
     }
 
-    fn spawn_subscriber() -> Session {
-        zenoh::open(zenoh::config::peer()).wait().unwrap()
-    }
+    #[async_std::test]
+    async fn test_node_handle_valid() {
+        let session = zenoh::open(zenoh::config::peer()).await.unwrap();
 
-    #[test]
-    fn test_node_handle_valid() {
-        node_handle("/test".to_string());
-
-        let subscriber = spawn_subscriber();
+        let mut subscriber = session.subscribe("/test").await.unwrap();
 
         let option_twist = create_test_data();
 
@@ -128,28 +124,16 @@ mod tests {
             angular: option_twist.angular.unwrap(),
         };
 
-        let mut reply = Twist {
-            linear: Vec3::default(),
-            angular: Vec3::default(),
-        };
+        thread::spawn(move || {
+            node_handle("/test".to_string());
 
-        let mut data_received = false;
-
-        let handle = thread::spawn(move || {
-            let mut replies = subscriber.get("/test/**").wait().unwrap();
-
-            executor::block_on(async {
-                while let Some(value) = replies.next().await {
-                    reply = cdr::deserialize(value.sample.value.payload.get_zslice(0).unwrap())
-                        .unwrap();
-                    data_received = true;
-                }
-            })
+            publish_message(option_twist);
         });
 
-        publish_message(option_twist);
+        let sample = subscriber.next().await.unwrap();
 
-        handle.join().unwrap();
-        assert_eq!(twist, reply);
+        let twist_reply = cdr::deserialize(&sample.value.payload.contiguous()).unwrap();
+
+        assert_eq!(twist, twist_reply);
     }
 }

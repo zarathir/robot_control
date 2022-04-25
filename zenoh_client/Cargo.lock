@@ -2720,6 +2720,7 @@ name = "zenoh_client"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "async-std",
  "cdr",
  "flutter_rust_bridge",
  "futures",
