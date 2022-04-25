@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:grpc/grpc.dart';
 import 'package:robot_control/ffi.dart';
 
-import 'models/teleop.pbgrpc.dart';
-
 class TeleopClientHandler {
   static const turtlebotMaxLinVel = 0.22;
   static const turtlebotMaxAngVel = 2.84;
@@ -19,12 +17,8 @@ class TeleopClientHandler {
 
   late ClientChannel channel;
 
-  TeleopClientHandler(
-      String host, ChannelCredentials credentials, Duration timeout) {
-    channel = ClientChannel(host,
-        port: 50051,
-        options:
-            ChannelOptions(credentials: credentials, idleTimeout: timeout));
+  TeleopClientHandler(String cmdKey) {
+    api.nodeHandle(cmdKey: cmdKey);
   }
 
   double _makeSimpleProfile(double output, double input, double slop) {
@@ -57,89 +51,55 @@ class TeleopClientHandler {
     return _constrain(vel, -turtlebotMaxAngVel, turtlebotMaxAngVel);
   }
 
-// ignore: todo
-// TODO handle exceptions properly for gRPC calls
-  Future<void> _sendCommand(TeleopClient stub) async {
+  Future<void> _sendCommand() async {
     controlLinearVel = _makeSimpleProfile(
         controlLinearVel, targetLinearVel, (linearVelStepSize / 2.0));
 
     controlAngularVel = _makeSimpleProfile(
         controlAngularVel, targetAngularVel, (angularVelStepSize / 2.0));
 
-    var linear = Vector3(x: controlLinearVel, y: 0, z: 0);
-    var angular = Vector3(x: 0, y: 0, z: controlAngularVel);
+    var linear = Vec3(x: controlLinearVel, y: 0, z: 0);
+    var angular = Vec3(x: 0, y: 0, z: controlAngularVel);
 
-    try {
-      stub.sendCommand(CommandRequest(linear: linear, angular: angular));
-    } catch (e) {
-      rethrow;
-    }
+    var twist = OptionTwist(linear: linear, angular: angular);
+
+    api.publishMessage(data: twist);
   }
 
   Future<void> accelerate() async {
-    var stub = TeleopClient(channel);
-
     targetLinearVel =
         _checkLinearLimitVelocity(targetLinearVel + linearVelStepSize);
 
-    try {
-      _sendCommand(stub);
-    } catch (e) {
-      rethrow;
-    }
+    _sendCommand();
   }
 
   Future<void> decelerate() async {
-    var stub = TeleopClient(channel);
-
     targetLinearVel =
         _checkLinearLimitVelocity(targetLinearVel - linearVelStepSize);
 
-    try {
-      _sendCommand(stub);
-    } catch (e) {
-      rethrow;
-    }
+    _sendCommand();
   }
 
   Future<void> leftwards() async {
-    var stub = TeleopClient(channel);
-
     targetAngularVel =
         _checkAngualarLimitVelocity(targetAngularVel + angularVelStepSize);
 
-    try {
-      _sendCommand(stub);
-    } catch (e) {
-      rethrow;
-    }
+    _sendCommand();
   }
 
   Future<void> rightwards() async {
-    var stub = TeleopClient(channel);
-
     targetAngularVel =
         _checkAngualarLimitVelocity(targetAngularVel - angularVelStepSize);
 
-    try {
-      _sendCommand(stub);
-    } catch (e) {
-      rethrow;
-    }
+    _sendCommand();
   }
 
   Future<void> stop() async {
-    var stub = TeleopClient(channel);
-
     targetLinearVel = 0;
     controlLinearVel = 0;
     targetAngularVel = 0;
     controlAngularVel = 0;
 
-    try {
-      _sendCommand(stub);
-    } catch (e) {
-      rethrow;
-    }
+    _sendCommand();
   }
 }
