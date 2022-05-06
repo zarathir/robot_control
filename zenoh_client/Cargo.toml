@@ -11,7 +11,7 @@ crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
-flutter_rust_bridge = "1"
+flutter_rust_bridge = "1.28.1"
 zenoh = { git = "https://github.com/eclipse-zenoh/zenoh" }
 cdr = "0.2.4"
 serde = "1.0.136"

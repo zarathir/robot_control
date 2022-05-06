@@ -43,9 +43,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.56"
+version = "1.0.57"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4361135be9122e0870de935d7c439aef945b9f9ddd4199a553b5270b49c82a27"
+checksum = "08f9b8508dccb7687a1d6c4ce66b2b0ecef467c94667de27d8d7fe1f8d2a9cdc"
 
 [[package]]
 name = "async-attributes"
@@ -590,9 +590,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge"
-version = "1.23.0"
+version = "1.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34dda21557c5854da4a705780f1324e572c6331bae0102aec533568556071e66"
+checksum = "7236264488ba563ee0ee3ada56989a8535a79f85ff76cd3a7c82275ffb958ab1"
 dependencies = [
  "allo-isolate",
  "anyhow",
