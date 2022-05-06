@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:robot_control/teleop_client_handler.dart';
+import 'package:robot_control/teleop_client_node.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Teleop Turtlebot',
       theme: ThemeData(
-        primarySwatch: Colors.lime,
+        primarySwatch: Colors.blue,
       ),
       home: const MyHomePage(title: 'Teleop Turtlebot'),
     );
@@ -30,7 +30,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TeleopClientHandler handler = TeleopClientHandler('/rt/cmd_vel');
+  TeleopClientHandler node = TeleopClientHandler('/rt/cmd_vel');
 
   final SizedBox _box = const SizedBox(
     height: 5,
@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             ElevatedButton(
-              onPressed: () async => handler.accelerate(),
+              onPressed: () async => node.accelerate(),
               child: const Icon(Icons.arrow_upward),
             ),
             _box,
@@ -56,25 +56,27 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () async => handler.leftwards(),
+                  onPressed: () async => node.leftwards(),
                   child: const Icon(Icons.arrow_back),
                 ),
                 _box,
                 ElevatedButton(
-                    onPressed: () async => handler.stop(),
+                    onPressed: () async => node.stop(),
                     child: const Icon(Icons.cancel_outlined)),
                 _box,
                 ElevatedButton(
-                    onPressed: () async => handler.rightwards(),
+                    onPressed: () async => node.rightwards(),
                     child: const Icon(Icons.arrow_forward))
               ],
             ),
             _box,
             ElevatedButton(
-              onPressed: () async => handler.decelerate(),
+              onPressed: () async => node.decelerate(),
               child: const Icon(Icons.arrow_downward),
             ),
             _box,
+            Text("linear.x: " + node.controlLinearVel.toString()),
+            Text("angular.z: " + node.controlAngularVel.toString())
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.

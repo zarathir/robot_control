@@ -1,21 +1,18 @@
 import 'dart:math';
 
-import 'package:grpc/grpc.dart';
 import 'package:robot_control/ffi.dart';
 
 class TeleopClientHandler {
-  static const turtlebotMaxLinVel = 0.22;
-  static const turtlebotMaxAngVel = 2.84;
+  static const _turtlebotMaxLinVel = 0.22;
+  static const _turtlebotMaxAngVel = 2.84;
 
-  static const linearVelStepSize = 0.01;
-  static const angularVelStepSize = 0.1;
+  static const _linearVelStepSize = 0.01;
+  static const _angularVelStepSize = 0.1;
 
-  double targetLinearVel = 0;
-  double targetAngularVel = 0;
+  double _targetLinearVel = 0;
+  double _targetAngularVel = 0;
   double controlLinearVel = 0;
   double controlAngularVel = 0;
-
-  late ClientChannel channel;
 
   TeleopClientHandler(String cmdKey) {
     api.nodeHandle(cmdKey: cmdKey);
@@ -44,19 +41,19 @@ class TeleopClientHandler {
   }
 
   double _checkLinearLimitVelocity(double vel) {
-    return _constrain(vel, -turtlebotMaxLinVel, turtlebotMaxLinVel);
+    return _constrain(vel, -_turtlebotMaxLinVel, _turtlebotMaxLinVel);
   }
 
   double _checkAngualarLimitVelocity(double vel) {
-    return _constrain(vel, -turtlebotMaxAngVel, turtlebotMaxAngVel);
+    return _constrain(vel, -_turtlebotMaxAngVel, _turtlebotMaxAngVel);
   }
 
   Future<void> _sendCommand() async {
     controlLinearVel = _makeSimpleProfile(
-        controlLinearVel, targetLinearVel, (linearVelStepSize / 2.0));
+        controlLinearVel, _targetLinearVel, (_linearVelStepSize / 2.0));
 
     controlAngularVel = _makeSimpleProfile(
-        controlAngularVel, targetAngularVel, (angularVelStepSize / 2.0));
+        controlAngularVel, _targetAngularVel, (_angularVelStepSize / 2.0));
 
     var linear = Vec3(x: controlLinearVel, y: 0, z: 0);
     var angular = Vec3(x: 0, y: 0, z: controlAngularVel);
@@ -67,37 +64,37 @@ class TeleopClientHandler {
   }
 
   Future<void> accelerate() async {
-    targetLinearVel =
-        _checkLinearLimitVelocity(targetLinearVel + linearVelStepSize);
+    _targetLinearVel =
+        _checkLinearLimitVelocity(_targetLinearVel + _linearVelStepSize);
 
     await _sendCommand();
   }
 
   Future<void> decelerate() async {
-    targetLinearVel =
-        _checkLinearLimitVelocity(targetLinearVel - linearVelStepSize);
+    _targetLinearVel =
+        _checkLinearLimitVelocity(_targetLinearVel - _linearVelStepSize);
 
     await _sendCommand();
   }
 
   Future<void> leftwards() async {
-    targetAngularVel =
-        _checkAngualarLimitVelocity(targetAngularVel + angularVelStepSize);
+    _targetAngularVel =
+        _checkAngualarLimitVelocity(_targetAngularVel + _angularVelStepSize);
 
     await _sendCommand();
   }
 
   Future<void> rightwards() async {
-    targetAngularVel =
-        _checkAngualarLimitVelocity(targetAngularVel - angularVelStepSize);
+    _targetAngularVel =
+        _checkAngualarLimitVelocity(_targetAngularVel - _angularVelStepSize);
 
     await _sendCommand();
   }
 
   Future<void> stop() async {
-    targetLinearVel = 0;
+    _targetLinearVel = 0;
     controlLinearVel = 0;
-    targetAngularVel = 0;
+    _targetAngularVel = 0;
     controlAngularVel = 0;
 
     await _sendCommand();
