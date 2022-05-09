@@ -14,8 +14,11 @@ class TeleopClientHandler {
   double controlLinearVel = 0;
   double controlAngularVel = 0;
 
+  String topic = "/test";
+
   TeleopClientHandler(String cmdKey) {
-    api.nodeHandle(cmdKey: cmdKey);
+    api.nodeHandle();
+    topic = cmdKey;
   }
 
   double _makeSimpleProfile(double output, double input, double slop) {
@@ -60,7 +63,7 @@ class TeleopClientHandler {
 
     var twist = OptionTwist(linear: linear, angular: angular);
 
-    await api.publishMessage(data: twist);
+    await api.publishMessage(topic: topic, data: twist);
   }
 
   Future<void> accelerate() async {

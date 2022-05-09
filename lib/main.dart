@@ -30,7 +30,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TeleopClientHandler node = TeleopClientHandler('/rt/cmd_vel');
+  TeleopClientHandler node = TeleopClientHandler('/rt/turtle1/cmd_vel');
 
   final SizedBox _box = const SizedBox(
     height: 5,
