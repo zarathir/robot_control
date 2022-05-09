@@ -35,7 +35,18 @@ impl ZenohSession {
     }
 }
 
+pub struct TopicMessage {
+    pub topic: String,
+    pub data: Vec<u8>,
+}
+
+impl TopicMessage {
+    pub fn new(topic: String, data: Vec<u8>) -> TopicMessage {
+        TopicMessage { topic, data }
+    }
+}
+
 pub enum Message {
-    Send(Vec<u8>),
+    Send(TopicMessage),
     Shutdown,
 }

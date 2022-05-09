@@ -4,6 +4,7 @@
     clippy::redundant_closure,
     clippy::useless_conversion,
     clippy::unit_arg,
+    clippy::double_parens,
     non_snake_case
 )]
 // AUTO GENERATED FILE, DO NOT EDIT.
@@ -17,22 +18,23 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_node_handle(port_: i64, cmd_key: *mut wire_uint_8_list) {
+pub extern "C" fn wire_node_handle(port_: i64) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "node_handle",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || {
-            let api_cmd_key = cmd_key.wire2api();
-            move |task_callback| Ok(node_handle(api_cmd_key))
-        },
+        move || move |task_callback| Ok(node_handle()),
     )
 }
 
 #[no_mangle]
-pub extern "C" fn wire_publish_message(port_: i64, data: *mut wire_OptionTwist) {
+pub extern "C" fn wire_publish_message(
+    port_: i64,
+    topic: *mut wire_uint_8_list,
+    data: *mut wire_OptionTwist,
+) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "publish_message",
@@ -40,8 +42,9 @@ pub extern "C" fn wire_publish_message(port_: i64, data: *mut wire_OptionTwist) 
             mode: FfiCallMode::Normal,
         },
         move || {
+            let api_topic = topic.wire2api();
             let api_data = data.wire2api();
-            move |task_callback| Ok(publish_message(api_data))
+            move |task_callback| Ok(publish_message(api_topic, api_data))
         },
     )
 }

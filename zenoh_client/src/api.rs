@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use std::thread;
 
-use crate::helper::{Comms, Message, ZenohSession};
+use crate::helper::{Comms, Message, TopicMessage, ZenohSession};
 
 lazy_static! {
     static ref COMMUNICATOR: Comms = Comms::new();
@@ -31,16 +31,16 @@ pub struct Vec3 {
     pub z: f64,
 }
 
-pub fn node_handle(cmd_key: String) {
+pub fn node_handle() {
     thread::spawn(move || loop {
         match COMMUNICATOR.receiver.lock().unwrap().recv().unwrap() {
-            Message::Send(data) => {
+            Message::Send(message) => {
                 executor::block_on(async {
                     ZENOH_SESSION
                         .session
                         .lock()
                         .unwrap()
-                        .put(cmd_key.clone(), data)
+                        .put(message.topic, message.data)
                         .await
                         .unwrap();
                 });
@@ -52,16 +52,17 @@ pub fn node_handle(cmd_key: String) {
     });
 }
 
-pub fn publish_message(data: OptionTwist) {
+pub fn publish_message(topic: String, data: OptionTwist) {
     let data = unwrap_message(data);
 
     COMMUNICATOR
         .sender
         .lock()
         .unwrap()
-        .send(Message::Send(
+        .send(Message::Send(TopicMessage::new(
+            topic,
             cdr::serialize::<_, _, CdrLe>(&data, Infinite).unwrap(),
-        ))
+        )))
         .unwrap();
 }
 
@@ -125,9 +126,9 @@ mod tests {
         };
 
         thread::spawn(move || {
-            node_handle("/test".to_string());
+            node_handle();
 
-            publish_message(option_twist);
+            publish_message("/test".to_string(), option_twist);
         });
 
         let sample = subscriber.next().await.unwrap();
