@@ -58,8 +58,8 @@ class TeleopClientHandler {
     controlAngularVel = _makeSimpleProfile(
         controlAngularVel, _targetAngularVel, (_angularVelStepSize / 2.0));
 
-    var linear = Vec3(x: controlLinearVel, y: 0, z: 0);
-    var angular = Vec3(x: 0, y: 0, z: controlAngularVel);
+    var linear = Vector3(x: controlLinearVel, y: 0, z: 0);
+    var angular = Vector3(x: 0, y: 0, z: controlAngularVel);
 
     var twist = OptionTwist(linear: linear, angular: angular);
 

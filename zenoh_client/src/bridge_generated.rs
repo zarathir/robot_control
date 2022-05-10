@@ -4,7 +4,6 @@
     clippy::redundant_closure,
     clippy::useless_conversion,
     clippy::unit_arg,
-    clippy::double_parens,
     non_snake_case
 )]
 // AUTO GENERATED FILE, DO NOT EDIT.
@@ -66,8 +65,8 @@ pub extern "C" fn wire_shutdown(port_: i64) {
 #[repr(C)]
 #[derive(Clone)]
 pub struct wire_OptionTwist {
-    linear: *mut wire_Vec3,
-    angular: *mut wire_Vec3,
+    linear: *mut wire_Vector3,
+    angular: *mut wire_Vector3,
 }
 
 #[repr(C)]
@@ -79,7 +78,7 @@ pub struct wire_uint_8_list {
 
 #[repr(C)]
 #[derive(Clone)]
-pub struct wire_Vec3 {
+pub struct wire_Vector3 {
     x: f64,
     y: f64,
     z: f64,
@@ -97,8 +96,8 @@ pub extern "C" fn new_box_autoadd_option_twist() -> *mut wire_OptionTwist {
 }
 
 #[no_mangle]
-pub extern "C" fn new_box_autoadd_vec_3() -> *mut wire_Vec3 {
-    support::new_leak_box_ptr(wire_Vec3::new_with_null_ptr())
+pub extern "C" fn new_box_autoadd_vector_3() -> *mut wire_Vector3 {
+    support::new_leak_box_ptr(wire_Vector3::new_with_null_ptr())
 }
 
 #[no_mangle]
@@ -143,8 +142,8 @@ impl Wire2Api<OptionTwist> for *mut wire_OptionTwist {
     }
 }
 
-impl Wire2Api<Vec3> for *mut wire_Vec3 {
-    fn wire2api(self) -> Vec3 {
+impl Wire2Api<Vector3> for *mut wire_Vector3 {
+    fn wire2api(self) -> Vector3 {
         let wrap = unsafe { support::box_from_leak_ptr(self) };
         (*wrap).wire2api().into()
     }
@@ -180,9 +179,9 @@ impl Wire2Api<Vec<u8>> for *mut wire_uint_8_list {
     }
 }
 
-impl Wire2Api<Vec3> for wire_Vec3 {
-    fn wire2api(self) -> Vec3 {
-        Vec3 {
+impl Wire2Api<Vector3> for wire_Vector3 {
+    fn wire2api(self) -> Vector3 {
+        Vector3 {
             x: self.x.wire2api(),
             y: self.y.wire2api(),
             z: self.z.wire2api(),
@@ -211,7 +210,7 @@ impl NewWithNullPtr for wire_OptionTwist {
     }
 }
 
-impl NewWithNullPtr for wire_Vec3 {
+impl NewWithNullPtr for wire_Vector3 {
     fn new_with_null_ptr() -> Self {
         Self {
             x: Default::default(),

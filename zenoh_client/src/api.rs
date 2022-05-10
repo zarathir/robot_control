@@ -14,18 +14,18 @@ lazy_static! {
 
 #[derive(Debug, Clone, Copy)]
 pub struct OptionTwist {
-    pub linear: Option<Vec3>,
-    pub angular: Option<Vec3>,
+    pub linear: Option<Vector3>,
+    pub angular: Option<Vector3>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 struct Twist {
-    linear: Vec3,
-    angular: Vec3,
+    linear: Vector3,
+    angular: Vector3,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq)]
-pub struct Vec3 {
+pub struct Vector3 {
     pub x: f64,
     pub y: f64,
     pub z: f64,
@@ -86,7 +86,7 @@ pub fn shutdown() {
 mod tests {
     use std::thread;
 
-    use super::{node_handle, publish_message, OptionTwist, Twist, Vec3};
+    use super::{node_handle, publish_message, OptionTwist, Twist, Vector3};
     use futures::StreamExt;
     use rand::{thread_rng, Rng};
     use zenoh::prelude::SplitBuffer;
@@ -94,13 +94,13 @@ mod tests {
     fn create_test_data() -> OptionTwist {
         let mut rng = thread_rng();
 
-        let linear = Vec3 {
+        let linear = Vector3 {
             x: rng.gen_range(-5.0..10.0),
             y: 0.0,
             z: 0.0,
         };
 
-        let angular = Vec3 {
+        let angular = Vector3 {
             x: 0.0,
             y: 0.0,
             z: rng.gen_range(-5.0..10.0),
