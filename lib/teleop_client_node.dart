@@ -14,7 +14,7 @@ class TeleopClientNode {
   double controlLinearVel = 0;
   double controlAngularVel = 0;
 
-  String topic = "/test";
+  String topic = "/*";
 
   TeleopClientNode(String cmdKey) {
     api.nodeHandle();
