@@ -44,5 +44,5 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-zenoh_client/target
+robot_node/target
 jniLibs

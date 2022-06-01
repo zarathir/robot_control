@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:robot_control/ffi.dart';
 
-class TeleopClientHandler {
+class TeleopClientNode {
   static const _turtlebotMaxLinVel = 0.22;
   static const _turtlebotMaxAngVel = 2.84;
 
@@ -16,7 +16,7 @@ class TeleopClientHandler {
 
   String topic = "/test";
 
-  TeleopClientHandler(String cmdKey) {
+  TeleopClientNode(String cmdKey) {
     api.nodeHandle();
     topic = cmdKey;
   }

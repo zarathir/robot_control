@@ -14,11 +14,11 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(Corrosion)
 
-corrosion_import_crate(MANIFEST_PATH ../zenoh_client/Cargo.toml)
+corrosion_import_crate(MANIFEST_PATH ../robot_node/Cargo.toml)
 
 # Flutter-specific
 
-set(CRATE_NAME "zenoh_client")
+set(CRATE_NAME "robot_node")
 
 target_link_libraries(${BINARY_NAME} PRIVATE ${CRATE_NAME})
 

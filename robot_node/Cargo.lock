@@ -1579,6 +1579,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "robot_node"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-std",
+ "cdr",
+ "flutter_rust_bridge",
+ "futures",
+ "rand",
+ "serde",
+ "serde_derive",
+ "zenoh",
+]
+
+[[package]]
 name = "rsa"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2713,21 +2728,6 @@ dependencies = [
  "zenoh-core",
  "zenoh-crypto",
  "zenoh-sync",
-]
-
-[[package]]
-name = "zenoh_client"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-std",
- "cdr",
- "flutter_rust_bridge",
- "futures",
- "rand",
- "serde",
- "serde_derive",
- "zenoh",
 ]
 
 [[package]]

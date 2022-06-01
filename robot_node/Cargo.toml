@@ -1,5 +1,5 @@
 [package]
-name = "zenoh_client"
+name = "robot_node"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [lib]
 path = "src/lib.rs"
-crate-type = ["cdylib", "staticlib"]
+crate-type = ["lib", "cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
