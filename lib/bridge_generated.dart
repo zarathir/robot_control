@@ -14,20 +14,11 @@ import 'dart:ffi' as ffi;
 abstract class RobotNode {
   Future<void> nodeHandle({dynamic hint});
 
-  Future<void> publishMessage(
-      {required String topic, required OptionTwist data, dynamic hint});
-
-  Future<void> shutdown({dynamic hint});
-}
-
-class OptionTwist {
-  final Vector3? linear;
-  final Vector3? angular;
-
-  OptionTwist({
-    this.linear,
-    this.angular,
-  });
+  Future<void> publishTwist(
+      {required String topic,
+      required Vector3 linear,
+      required Vector3 angular,
+      dynamic hint});
 }
 
 class Vector3 {
@@ -61,41 +52,29 @@ class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
         hint: hint,
       ));
 
-  Future<void> publishMessage(
-          {required String topic, required OptionTwist data, dynamic hint}) =>
+  Future<void> publishTwist(
+          {required String topic,
+          required Vector3 linear,
+          required Vector3 angular,
+          dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_publish_message(port_,
-            _api2wire_String(topic), _api2wire_box_autoadd_option_twist(data)),
+        callFfi: (port_) => inner.wire_publish_twist(
+            port_,
+            _api2wire_String(topic),
+            _api2wire_box_autoadd_vector_3(linear),
+            _api2wire_box_autoadd_vector_3(angular)),
         parseSuccessData: _wire2api_unit,
         constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "publish_message",
-          argNames: ["topic", "data"],
+          debugName: "publish_twist",
+          argNames: ["topic", "linear", "angular"],
         ),
-        argValues: [topic, data],
-        hint: hint,
-      ));
-
-  Future<void> shutdown({dynamic hint}) => executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_shutdown(port_),
-        parseSuccessData: _wire2api_unit,
-        constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "shutdown",
-          argNames: [],
-        ),
-        argValues: [],
+        argValues: [topic, linear, angular],
         hint: hint,
       ));
 
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
-  }
-
-  ffi.Pointer<wire_OptionTwist> _api2wire_box_autoadd_option_twist(
-      OptionTwist raw) {
-    final ptr = inner.new_box_autoadd_option_twist();
-    _api_fill_to_wire_option_twist(raw, ptr.ref);
-    return ptr;
   }
 
   ffi.Pointer<wire_Vector3> _api2wire_box_autoadd_vector_3(Vector3 raw) {
@@ -106,10 +85,6 @@ class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
 
   double _api2wire_f64(double raw) {
     return raw;
-  }
-
-  ffi.Pointer<wire_Vector3> _api2wire_opt_box_autoadd_vector_3(Vector3? raw) {
-    return raw == null ? ffi.nullptr : _api2wire_box_autoadd_vector_3(raw);
   }
 
   int _api2wire_u8(int raw) {
@@ -124,25 +99,9 @@ class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
 
   // Section: api_fill_to_wire
 
-  void _api_fill_to_wire_box_autoadd_option_twist(
-      OptionTwist apiObj, ffi.Pointer<wire_OptionTwist> wireObj) {
-    _api_fill_to_wire_option_twist(apiObj, wireObj.ref);
-  }
-
   void _api_fill_to_wire_box_autoadd_vector_3(
       Vector3 apiObj, ffi.Pointer<wire_Vector3> wireObj) {
     _api_fill_to_wire_vector_3(apiObj, wireObj.ref);
-  }
-
-  void _api_fill_to_wire_opt_box_autoadd_vector_3(
-      Vector3? apiObj, ffi.Pointer<wire_Vector3> wireObj) {
-    if (apiObj != null) _api_fill_to_wire_box_autoadd_vector_3(apiObj, wireObj);
-  }
-
-  void _api_fill_to_wire_option_twist(
-      OptionTwist apiObj, wire_OptionTwist wireObj) {
-    wireObj.linear = _api2wire_opt_box_autoadd_vector_3(apiObj.linear);
-    wireObj.angular = _api2wire_opt_box_autoadd_vector_3(apiObj.angular);
   }
 
   void _api_fill_to_wire_vector_3(Vector3 apiObj, wire_Vector3 wireObj) {
@@ -193,49 +152,30 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
   late final _wire_node_handle =
       _wire_node_handlePtr.asFunction<void Function(int)>();
 
-  void wire_publish_message(
+  void wire_publish_twist(
     int port_,
     ffi.Pointer<wire_uint_8_list> topic,
-    ffi.Pointer<wire_OptionTwist> data,
+    ffi.Pointer<wire_Vector3> linear,
+    ffi.Pointer<wire_Vector3> angular,
   ) {
-    return _wire_publish_message(
+    return _wire_publish_twist(
       port_,
       topic,
-      data,
+      linear,
+      angular,
     );
   }
 
-  late final _wire_publish_messagePtr = _lookup<
+  late final _wire_publish_twistPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
-              ffi.Pointer<wire_OptionTwist>)>>('wire_publish_message');
-  late final _wire_publish_message = _wire_publish_messagePtr.asFunction<
-      void Function(
-          int, ffi.Pointer<wire_uint_8_list>, ffi.Pointer<wire_OptionTwist>)>();
-
-  void wire_shutdown(
-    int port_,
-  ) {
-    return _wire_shutdown(
-      port_,
-    );
-  }
-
-  late final _wire_shutdownPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_shutdown');
-  late final _wire_shutdown =
-      _wire_shutdownPtr.asFunction<void Function(int)>();
-
-  ffi.Pointer<wire_OptionTwist> new_box_autoadd_option_twist() {
-    return _new_box_autoadd_option_twist();
-  }
-
-  late final _new_box_autoadd_option_twistPtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<wire_OptionTwist> Function()>>(
-          'new_box_autoadd_option_twist');
-  late final _new_box_autoadd_option_twist = _new_box_autoadd_option_twistPtr
-      .asFunction<ffi.Pointer<wire_OptionTwist> Function()>();
+          ffi.Void Function(
+              ffi.Int64,
+              ffi.Pointer<wire_uint_8_list>,
+              ffi.Pointer<wire_Vector3>,
+              ffi.Pointer<wire_Vector3>)>>('wire_publish_twist');
+  late final _wire_publish_twist = _wire_publish_twistPtr.asFunction<
+      void Function(int, ffi.Pointer<wire_uint_8_list>,
+          ffi.Pointer<wire_Vector3>, ffi.Pointer<wire_Vector3>)>();
 
   ffi.Pointer<wire_Vector3> new_box_autoadd_vector_3() {
     return _new_box_autoadd_vector_3();
@@ -307,12 +247,6 @@ class wire_Vector3 extends ffi.Struct {
 
   @ffi.Double()
   external double z;
-}
-
-class wire_OptionTwist extends ffi.Struct {
-  external ffi.Pointer<wire_Vector3> linear;
-
-  external ffi.Pointer<wire_Vector3> angular;
 }
 
 typedef DartPostCObjectFnType = ffi.Pointer<

@@ -11,12 +11,24 @@ crate-type = ["lib", "cdylib", "staticlib"]
 
 [dependencies]
 anyhow = "1"
-flutter_rust_bridge = "1.28.1"
-zenoh = { git = "https://github.com/eclipse-zenoh/zenoh" }
+flutter_rust_bridge = "1"
 cdr = "0.2.4"
 serde = "1.0.136"
 serde_derive = "1.0.136"
 futures = "0.3.21"
+cfg-if = "1"
+
+[target.'cfg(unix)'.dependencies]
+zenoh = { git = "https://github.com/eclipse-zenoh/zenoh" }
+
+[target.'cfg(windows)'.dependencies]
+zenoh = { git = "https://github.com/eclipse-zenoh/zenoh" }
+
+[target.'cfg(android)'.dependencies]
+hyper = "0.14.19"
+
+[target.'cfg(web)'.dependencies]
+hyper = "0.14.19"
 
 [dev-dependencies]
 rand = "0.8.5"

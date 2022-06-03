@@ -61,9 +61,7 @@ class TeleopClientNode {
     var linear = Vector3(x: controlLinearVel, y: 0, z: 0);
     var angular = Vector3(x: 0, y: 0, z: controlAngularVel);
 
-    var twist = OptionTwist(linear: linear, angular: angular);
-
-    await api.publishMessage(topic: topic, data: twist);
+    await api.publishTwist(topic: topic, linear: linear, angular: angular);
   }
 
   Future<void> accelerate() async {

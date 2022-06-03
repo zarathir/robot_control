@@ -30,45 +30,28 @@ pub extern "C" fn wire_node_handle(port_: i64) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_publish_message(
+pub extern "C" fn wire_publish_twist(
     port_: i64,
     topic: *mut wire_uint_8_list,
-    data: *mut wire_OptionTwist,
+    linear: *mut wire_Vector3,
+    angular: *mut wire_Vector3,
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "publish_message",
+            debug_name: "publish_twist",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
         move || {
             let api_topic = topic.wire2api();
-            let api_data = data.wire2api();
-            move |task_callback| Ok(publish_message(api_topic, api_data))
+            let api_linear = linear.wire2api();
+            let api_angular = angular.wire2api();
+            move |task_callback| Ok(publish_twist(api_topic, api_linear, api_angular))
         },
-    )
-}
-
-#[no_mangle]
-pub extern "C" fn wire_shutdown(port_: i64) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap(
-        WrapInfo {
-            debug_name: "shutdown",
-            port: Some(port_),
-            mode: FfiCallMode::Normal,
-        },
-        move || move |task_callback| Ok(shutdown()),
     )
 }
 
 // Section: wire structs
-
-#[repr(C)]
-#[derive(Clone)]
-pub struct wire_OptionTwist {
-    linear: *mut wire_Vector3,
-    angular: *mut wire_Vector3,
-}
 
 #[repr(C)]
 #[derive(Clone)]
@@ -90,11 +73,6 @@ pub struct wire_Vector3 {
 // Section: static checks
 
 // Section: allocate functions
-
-#[no_mangle]
-pub extern "C" fn new_box_autoadd_option_twist() -> *mut wire_OptionTwist {
-    support::new_leak_box_ptr(wire_OptionTwist::new_with_null_ptr())
-}
 
 #[no_mangle]
 pub extern "C" fn new_box_autoadd_vector_3() -> *mut wire_Vector3 {
@@ -136,13 +114,6 @@ impl Wire2Api<String> for *mut wire_uint_8_list {
     }
 }
 
-impl Wire2Api<OptionTwist> for *mut wire_OptionTwist {
-    fn wire2api(self) -> OptionTwist {
-        let wrap = unsafe { support::box_from_leak_ptr(self) };
-        (*wrap).wire2api().into()
-    }
-}
-
 impl Wire2Api<Vector3> for *mut wire_Vector3 {
     fn wire2api(self) -> Vector3 {
         let wrap = unsafe { support::box_from_leak_ptr(self) };
@@ -153,15 +124,6 @@ impl Wire2Api<Vector3> for *mut wire_Vector3 {
 impl Wire2Api<f64> for f64 {
     fn wire2api(self) -> f64 {
         self
-    }
-}
-
-impl Wire2Api<OptionTwist> for wire_OptionTwist {
-    fn wire2api(self) -> OptionTwist {
-        OptionTwist {
-            linear: self.linear.wire2api(),
-            angular: self.angular.wire2api(),
-        }
     }
 }
 
@@ -199,15 +161,6 @@ pub trait NewWithNullPtr {
 impl<T> NewWithNullPtr for *mut T {
     fn new_with_null_ptr() -> Self {
         std::ptr::null_mut()
-    }
-}
-
-impl NewWithNullPtr for wire_OptionTwist {
-    fn new_with_null_ptr() -> Self {
-        Self {
-            linear: core::ptr::null_mut(),
-            angular: core::ptr::null_mut(),
-        }
     }
 }
 
