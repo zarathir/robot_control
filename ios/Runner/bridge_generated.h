@@ -23,7 +23,7 @@ typedef int64_t DartPort;
 
 typedef bool (*DartPostCObjectFnType)(DartPort port_id, void *message);
 
-void wire_node_handle(int64_t port_);
+void wire_node_handle(int64_t port_, struct wire_uint_8_list *url);
 
 void wire_publish_twist(int64_t port_,
                         struct wire_uint_8_list *topic,

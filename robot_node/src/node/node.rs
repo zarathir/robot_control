@@ -6,21 +6,35 @@ use std::thread;
 
 use crate::node::helper::{Comms, Message};
 
-cfg_if::cfg_if! {
-    if #[cfg(android)]{
-        use hyper::*;
-    } else if #[cfg(web)]{
-        use hyper::*;
-    } else {
-        use zenoh::prelude::ZFuture;
-    }
-}
-
 lazy_static! {
     static ref COMMUNICATOR: Comms = Comms::new();
 }
 
-pub fn init_node() {
+pub fn init_node(url: String) {
+    cfg_if::cfg_if! {
+        if #[cfg(target_os = "android")]{
+            rest_node(url);
+        } else {
+            zenoh_node();
+        }
+    }
+}
+
+pub fn publish_message<S: Serialize>(topic: String, msg: S) {
+    let data = cdr::serialize::<_, _, CdrLe>(&msg, Infinite).unwrap();
+
+    COMMUNICATOR
+        .sender
+        .lock()
+        .unwrap()
+        .send(Message::new(topic, data))
+        .unwrap();
+}
+
+#[cfg(not(target_os = "android"))]
+fn zenoh_node() {
+    use zenoh::prelude::ZFuture;
+
     let config = zenoh::config::peer();
     let session = zenoh::open(config).wait().unwrap();
 
@@ -33,15 +47,25 @@ pub fn init_node() {
     });
 }
 
-pub fn publish_message<S: Serialize>(topic: String, msg: S) {
-    let data = cdr::serialize::<_, _, CdrLe>(&msg, Infinite).unwrap();
+#[cfg(target_os = "android")]
+fn rest_node(url: String) {
+    use reqwest::Client;
 
-    COMMUNICATOR
-        .sender
-        .lock()
-        .unwrap()
-        .send(Message::new(topic, data))
-        .unwrap();
+    let client = Client::new();
+
+    thread::spawn(move || loop {
+        let msg = COMMUNICATOR.receiver.lock().unwrap().recv().unwrap();
+
+        executor::block_on(async {
+            let res = client
+                .put(url + &msg.topic)
+                .body(msg.data)
+                .header("Content-Type", "application/octet-stream")
+                .send()
+                .await
+                .unwrap();
+        });
+    });
 }
 
 #[cfg(test)]
@@ -85,7 +109,7 @@ mod tests {
         let twist = create_test_data();
 
         thread::spawn(move || {
-            init_node();
+            init_node("".to_string());
 
             publish_message("/test".to_string(), twist);
         });

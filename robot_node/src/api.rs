@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde_derive::{Deserialize, Serialize};
 
 use crate::node::{self, Twist};
 
@@ -9,8 +9,8 @@ pub struct Vector3 {
     pub z: f64,
 }
 
-pub fn node_handle() {
-    node::init_node();
+pub fn node_handle(url: String) {
+    node::init_node(url);
 }
 
 pub fn publish_twist(topic: String, linear: Vector3, angular: Vector3) {

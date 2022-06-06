@@ -18,17 +18,12 @@ serde_derive = "1.0.136"
 futures = "0.3.21"
 cfg-if = "1"
 
-[target.'cfg(unix)'.dependencies]
+[target.'cfg(not(target_os = "android"))'.dependencies]
 zenoh = { git = "https://github.com/eclipse-zenoh/zenoh" }
 
-[target.'cfg(windows)'.dependencies]
-zenoh = { git = "https://github.com/eclipse-zenoh/zenoh" }
+[target.'cfg(target_os = "android")'.dependencies]
+reqwest = "0.11"
 
-[target.'cfg(android)'.dependencies]
-hyper = "0.14.19"
-
-[target.'cfg(web)'.dependencies]
-hyper = "0.14.19"
 
 [dev-dependencies]
 rand = "0.8.5"

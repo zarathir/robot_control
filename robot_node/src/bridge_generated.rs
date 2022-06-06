@@ -18,14 +18,17 @@ use flutter_rust_bridge::*;
 // Section: wire functions
 
 #[no_mangle]
-pub extern "C" fn wire_node_handle(port_: i64) {
+pub extern "C" fn wire_node_handle(port_: i64, url: *mut wire_uint_8_list) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
             debug_name: "node_handle",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
-        move || move |task_callback| Ok(node_handle()),
+        move || {
+            let api_url = url.wire2api();
+            move |task_callback| Ok(node_handle(api_url))
+        },
     )
 }
 

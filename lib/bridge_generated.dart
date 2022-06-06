@@ -12,7 +12,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge.dart';
 import 'dart:ffi' as ffi;
 
 abstract class RobotNode {
-  Future<void> nodeHandle({dynamic hint});
+  Future<void> nodeHandle({required String url, dynamic hint});
 
   Future<void> publishTwist(
       {required String topic,
@@ -40,15 +40,16 @@ class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
 
   RobotNodeImpl.raw(RobotNodeWire inner) : super(inner);
 
-  Future<void> nodeHandle({dynamic hint}) =>
+  Future<void> nodeHandle({required String url, dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_node_handle(port_),
+        callFfi: (port_) =>
+            inner.wire_node_handle(port_, _api2wire_String(url)),
         parseSuccessData: _wire2api_unit,
         constMeta: const FlutterRustBridgeTaskConstMeta(
           debugName: "node_handle",
-          argNames: [],
+          argNames: ["url"],
         ),
-        argValues: [],
+        argValues: [url],
         hint: hint,
       ));
 
@@ -140,17 +141,20 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
 
   void wire_node_handle(
     int port_,
+    ffi.Pointer<wire_uint_8_list> url,
   ) {
     return _wire_node_handle(
       port_,
+      url,
     );
   }
 
-  late final _wire_node_handlePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int64)>>(
-          'wire_node_handle');
-  late final _wire_node_handle =
-      _wire_node_handlePtr.asFunction<void Function(int)>();
+  late final _wire_node_handlePtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Int64, ffi.Pointer<wire_uint_8_list>)>>('wire_node_handle');
+  late final _wire_node_handle = _wire_node_handlePtr
+      .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
   void wire_publish_twist(
     int port_,

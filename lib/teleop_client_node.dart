@@ -17,7 +17,7 @@ class TeleopClientNode {
   String topic = "/*";
 
   TeleopClientNode(String cmdKey) {
-    api.nodeHandle();
+    api.nodeHandle(url: '');
     topic = cmdKey;
   }
 
