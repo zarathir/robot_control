@@ -1,5 +1,5 @@
-mod helper;
-mod msg;
+mod comms;
+pub(crate) mod msg;
 mod node;
 
 pub use msg::*;

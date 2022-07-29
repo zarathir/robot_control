@@ -25,7 +25,7 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn new(topic: String, data: Vec<u8>) -> Message {
+    pub fn new(topic: String, data: Vec<u8>) -> Self {
         Message { topic, data }
     }
 }

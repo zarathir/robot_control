@@ -1,38 +1,15 @@
-use cdr::{CdrLe, Infinite};
 use flutter_rust_bridge::support::lazy_static;
-use futures::executor;
-use serde::Serialize;
-use std::thread;
 
-use crate::node::helper::{Comms, Message};
+use crate::node::comms::{Comms, Message};
 
 lazy_static! {
     static ref COMMUNICATOR: Comms = Comms::new();
 }
 
-pub fn init_node(url: String) {
-    cfg_if::cfg_if! {
-        if #[cfg(target_os = "android")]{
-            rest_node(url);
-        } else {
-            zenoh_node();
-        }
-    }
-}
-
-pub fn publish_message<S: Serialize>(topic: String, msg: S) {
-    let data = cdr::serialize::<_, _, CdrLe>(&msg, Infinite).unwrap();
-
-    COMMUNICATOR
-        .sender
-        .lock()
-        .unwrap()
-        .send(Message::new(topic, data))
-        .unwrap();
-}
-
 #[cfg(not(target_os = "android"))]
-fn zenoh_node() {
+pub fn init_node(url: String) {
+    use futures::executor;
+    use std::thread;
     use zenoh::prelude::ZFuture;
 
     let config = zenoh::config::peer();
@@ -47,37 +24,23 @@ fn zenoh_node() {
     });
 }
 
-#[cfg(target_os = "android")]
-fn rest_node(url: String) {
-    use reqwest::Client;
-
-    let client = Client::new();
-
-    thread::spawn(move || loop {
-        let msg = COMMUNICATOR.receiver.lock().unwrap().recv().unwrap();
-
-        executor::block_on(async {
-            let res = client
-                .put(url + &msg.topic)
-                .body(msg.data)
-                .header("Content-Type", "application/octet-stream")
-                .send()
-                .await
-                .unwrap();
-        });
-    });
+pub fn publish_message(topic: String, data: Vec<u8>) {
+    COMMUNICATOR
+        .sender
+        .lock()
+        .unwrap()
+        .send(Message::new(topic, data))
+        .unwrap();
 }
 
 #[cfg(test)]
 mod tests {
     use std::thread;
 
-    use crate::{
-        api::Vector3,
-        node::{init_node, msg::Twist},
-    };
+    use crate::node::{init_node, msg::Twist, Vector3};
 
     use super::publish_message;
+    use cdr::{CdrLe, Infinite};
     use futures::StreamExt;
     use rand::{thread_rng, Rng};
     use zenoh::prelude::SplitBuffer;
@@ -111,7 +74,10 @@ mod tests {
         thread::spawn(move || {
             init_node("".to_string());
 
-            publish_message("/test".to_string(), twist);
+            publish_message(
+                "/test".to_string(),
+                cdr::serialize::<_, _, CdrLe>(&twist, Infinite).unwrap(),
+            );
         });
 
         let sample = subscriber.next().await.unwrap();

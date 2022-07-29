@@ -1,20 +1,34 @@
-use serde_derive::{Deserialize, Serialize};
+use cdr::{CdrLe, Infinite};
+use flutter_rust_bridge::ZeroCopyBuffer;
 
-use crate::node::{self, Twist};
+use crate::node::Twist;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq)]
-pub struct Vector3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+cfg_if::cfg_if!(
+    if #[cfg(not(target_os = "android"))] {
+        use crate::node;
+    }
+);
+
+pub fn node_handle(url: String) -> anyhow::Result<()> {
+    cfg_if::cfg_if!(
+        if #[cfg(not(target_os = "android"))] {
+            node::init_node(url);
+        } else {
+            Err("Not implemented for this plaftorm.")
+        }
+    );
+    Ok(())
 }
 
-pub fn node_handle(url: String) {
-    node::init_node(url);
-}
+pub fn generate_twist(topic: String, x: f64, z: f64) -> Option<ZeroCopyBuffer<Vec<u8>>> {
+    let msg = Twist::from_x_z(x, z);
+    let data = cdr::serialize::<_, _, CdrLe>(&msg, Infinite).unwrap();
 
-pub fn publish_twist(topic: String, linear: Vector3, angular: Vector3) {
-    let data = Twist { linear, angular };
-
-    node::publish_message(topic, data);
+    cfg_if::cfg_if!(
+    if #[cfg(target_os = "android")] {
+        Some(ZeroCopyBuffer(data))
+    } else {
+        node::publish_message(topic, data);
+    });
+    None
 }

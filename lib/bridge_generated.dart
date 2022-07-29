@@ -14,23 +14,11 @@ import 'dart:ffi' as ffi;
 abstract class RobotNode {
   Future<void> nodeHandle({required String url, dynamic hint});
 
-  Future<void> publishTwist(
+  Future<Uint8List?> generateTwist(
       {required String topic,
-      required Vector3 linear,
-      required Vector3 angular,
+      required double x,
+      required double z,
       dynamic hint});
-}
-
-class Vector3 {
-  final double x;
-  final double y;
-  final double z;
-
-  Vector3({
-    required this.x,
-    required this.y,
-    required this.z,
-  });
 }
 
 class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
@@ -53,35 +41,26 @@ class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
         hint: hint,
       ));
 
-  Future<void> publishTwist(
+  Future<Uint8List?> generateTwist(
           {required String topic,
-          required Vector3 linear,
-          required Vector3 angular,
+          required double x,
+          required double z,
           dynamic hint}) =>
       executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => inner.wire_publish_twist(
-            port_,
-            _api2wire_String(topic),
-            _api2wire_box_autoadd_vector_3(linear),
-            _api2wire_box_autoadd_vector_3(angular)),
-        parseSuccessData: _wire2api_unit,
+        callFfi: (port_) => inner.wire_generate_twist(
+            port_, _api2wire_String(topic), _api2wire_f64(x), _api2wire_f64(z)),
+        parseSuccessData: _wire2api_opt_ZeroCopyBuffer_Uint8List,
         constMeta: const FlutterRustBridgeTaskConstMeta(
-          debugName: "publish_twist",
-          argNames: ["topic", "linear", "angular"],
+          debugName: "generate_twist",
+          argNames: ["topic", "x", "z"],
         ),
-        argValues: [topic, linear, angular],
+        argValues: [topic, x, z],
         hint: hint,
       ));
 
   // Section: api2wire
   ffi.Pointer<wire_uint_8_list> _api2wire_String(String raw) {
     return _api2wire_uint_8_list(utf8.encoder.convert(raw));
-  }
-
-  ffi.Pointer<wire_Vector3> _api2wire_box_autoadd_vector_3(Vector3 raw) {
-    final ptr = inner.new_box_autoadd_vector_3();
-    _api_fill_to_wire_vector_3(raw, ptr.ref);
-    return ptr;
   }
 
   double _api2wire_f64(double raw) {
@@ -100,19 +79,25 @@ class RobotNodeImpl extends FlutterRustBridgeBase<RobotNodeWire>
 
   // Section: api_fill_to_wire
 
-  void _api_fill_to_wire_box_autoadd_vector_3(
-      Vector3 apiObj, ffi.Pointer<wire_Vector3> wireObj) {
-    _api_fill_to_wire_vector_3(apiObj, wireObj.ref);
-  }
-
-  void _api_fill_to_wire_vector_3(Vector3 apiObj, wire_Vector3 wireObj) {
-    wireObj.x = _api2wire_f64(apiObj.x);
-    wireObj.y = _api2wire_f64(apiObj.y);
-    wireObj.z = _api2wire_f64(apiObj.z);
-  }
 }
 
 // Section: wire2api
+Uint8List _wire2api_ZeroCopyBuffer_Uint8List(dynamic raw) {
+  return raw as Uint8List;
+}
+
+Uint8List? _wire2api_opt_ZeroCopyBuffer_Uint8List(dynamic raw) {
+  return raw == null ? null : _wire2api_ZeroCopyBuffer_Uint8List(raw);
+}
+
+int _wire2api_u8(dynamic raw) {
+  return raw as int;
+}
+
+Uint8List _wire2api_uint_8_list(dynamic raw) {
+  return raw as Uint8List;
+}
+
 void _wire2api_unit(dynamic raw) {
   return;
 }
@@ -156,40 +141,26 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
   late final _wire_node_handle = _wire_node_handlePtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
-  void wire_publish_twist(
+  void wire_generate_twist(
     int port_,
     ffi.Pointer<wire_uint_8_list> topic,
-    ffi.Pointer<wire_Vector3> linear,
-    ffi.Pointer<wire_Vector3> angular,
+    double x,
+    double z,
   ) {
-    return _wire_publish_twist(
+    return _wire_generate_twist(
       port_,
       topic,
-      linear,
-      angular,
+      x,
+      z,
     );
   }
 
-  late final _wire_publish_twistPtr = _lookup<
+  late final _wire_generate_twistPtr = _lookup<
       ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Int64,
-              ffi.Pointer<wire_uint_8_list>,
-              ffi.Pointer<wire_Vector3>,
-              ffi.Pointer<wire_Vector3>)>>('wire_publish_twist');
-  late final _wire_publish_twist = _wire_publish_twistPtr.asFunction<
-      void Function(int, ffi.Pointer<wire_uint_8_list>,
-          ffi.Pointer<wire_Vector3>, ffi.Pointer<wire_Vector3>)>();
-
-  ffi.Pointer<wire_Vector3> new_box_autoadd_vector_3() {
-    return _new_box_autoadd_vector_3();
-  }
-
-  late final _new_box_autoadd_vector_3Ptr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<wire_Vector3> Function()>>(
-          'new_box_autoadd_vector_3');
-  late final _new_box_autoadd_vector_3 = _new_box_autoadd_vector_3Ptr
-      .asFunction<ffi.Pointer<wire_Vector3> Function()>();
+          ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
+              ffi.Double, ffi.Double)>>('wire_generate_twist');
+  late final _wire_generate_twist = _wire_generate_twistPtr.asFunction<
+      void Function(int, ffi.Pointer<wire_uint_8_list>, double, double)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list(
     int len,
@@ -240,17 +211,6 @@ class wire_uint_8_list extends ffi.Struct {
 
   @ffi.Int32()
   external int len;
-}
-
-class wire_Vector3 extends ffi.Struct {
-  @ffi.Double()
-  external double x;
-
-  @ffi.Double()
-  external double y;
-
-  @ffi.Double()
-  external double z;
 }
 
 typedef DartPostCObjectFnType = ffi.Pointer<
