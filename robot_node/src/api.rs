@@ -1,140 +1,34 @@
 use cdr::{CdrLe, Infinite};
-use flutter_rust_bridge::support::lazy_static;
-use futures::executor;
-use serde::{Deserialize, Serialize};
+use flutter_rust_bridge::ZeroCopyBuffer;
 
-use std::thread;
+use crate::node::Twist;
 
-use crate::helper::{Comms, Message, TopicMessage, ZenohSession};
+cfg_if::cfg_if!(
+    if #[cfg(not(target_os = "android"))] {
+        use crate::node;
+    }
+);
 
-lazy_static! {
-    static ref COMMUNICATOR: Comms = Comms::new();
-    static ref ZENOH_SESSION: ZenohSession = ZenohSession::new();
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct OptionTwist {
-    pub linear: Option<Vector3>,
-    pub angular: Option<Vector3>,
-}
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
-struct Twist {
-    linear: Vector3,
-    angular: Vector3,
-}
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq)]
-pub struct Vector3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
-}
-
-pub fn node_handle() {
-    thread::spawn(move || loop {
-        match COMMUNICATOR.receiver.lock().unwrap().recv().unwrap() {
-            Message::Send(message) => {
-                executor::block_on(async {
-                    ZENOH_SESSION
-                        .session
-                        .lock()
-                        .unwrap()
-                        .put(message.topic, message.data)
-                        .await
-                        .unwrap();
-                });
-            }
-            Message::Shutdown => {
-                break;
-            }
+pub fn node_handle(url: String) -> anyhow::Result<()> {
+    cfg_if::cfg_if!(
+        if #[cfg(not(target_os = "android"))] {
+            node::init_node(url);
+        } else {
+            Err("Not implemented for this plaftorm.")
         }
+    );
+    Ok(())
+}
+
+pub fn generate_twist(topic: String, x: f64, z: f64) -> Option<ZeroCopyBuffer<Vec<u8>>> {
+    let msg = Twist::from_x_z(x, z);
+    let data = cdr::serialize::<_, _, CdrLe>(&msg, Infinite).unwrap();
+
+    cfg_if::cfg_if!(
+    if #[cfg(target_os = "android")] {
+        Some(ZeroCopyBuffer(data))
+    } else {
+        node::publish_message(topic, data);
     });
-}
-
-pub fn publish_message(topic: String, data: OptionTwist) {
-    let data = unwrap_message(data);
-
-    COMMUNICATOR
-        .sender
-        .lock()
-        .unwrap()
-        .send(Message::Send(TopicMessage::new(
-            topic,
-            cdr::serialize::<_, _, CdrLe>(&data, Infinite).unwrap(),
-        )))
-        .unwrap();
-}
-
-fn unwrap_message(data: OptionTwist) -> Twist {
-    Twist {
-        linear: data.linear.unwrap(),
-        angular: data.angular.unwrap(),
-    }
-}
-
-pub fn shutdown() {
-    COMMUNICATOR
-        .sender
-        .lock()
-        .unwrap()
-        .send(Message::Shutdown)
-        .unwrap();
-}
-
-#[cfg(test)]
-mod tests {
-    use std::thread;
-
-    use super::{node_handle, publish_message, OptionTwist, Twist, Vector3};
-    use futures::StreamExt;
-    use rand::{thread_rng, Rng};
-    use zenoh::prelude::SplitBuffer;
-
-    fn create_test_data() -> OptionTwist {
-        let mut rng = thread_rng();
-
-        let linear = Vector3 {
-            x: rng.gen_range(-5.0..10.0),
-            y: 0.0,
-            z: 0.0,
-        };
-
-        let angular = Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: rng.gen_range(-5.0..10.0),
-        };
-
-        OptionTwist {
-            linear: Some(linear),
-            angular: Some(angular),
-        }
-    }
-
-    #[async_std::test]
-    async fn test_node_handle_valid() {
-        let session = zenoh::open(zenoh::config::peer()).await.unwrap();
-
-        let mut subscriber = session.subscribe("/test").await.unwrap();
-
-        let option_twist = create_test_data();
-
-        let twist = Twist {
-            linear: option_twist.linear.unwrap(),
-            angular: option_twist.angular.unwrap(),
-        };
-
-        thread::spawn(move || {
-            node_handle();
-
-            publish_message("/test".to_string(), option_twist);
-        });
-
-        let sample = subscriber.next().await.unwrap();
-
-        let twist_reply = cdr::deserialize(&sample.value.payload.contiguous()).unwrap();
-
-        assert_eq!(twist, twist_reply);
-    }
+    None
 }

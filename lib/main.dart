@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:robot_control/teleop_client_node.dart';
+import 'package:robot_control/teleop/teleop_http.dart';
+import 'package:robot_control/teleop/teleop_zenoh.dart';
+import 'package:robot_control/teleop/teleoperation_interface.dart';
+import 'dart:io' as io;
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +33,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TeleopClientNode node = TeleopClientNode('/cmd_vel');
+  TeleoperationInterface node = io.Platform.isAndroid
+      ? TeleopHttp('localhost:8447')
+      : TeleopZenoh('localhost:8447');
 
   final SizedBox _box = const SizedBox(
     height: 5,
@@ -75,8 +80,6 @@ class _MyHomePageState extends State<MyHomePage> {
               child: const Icon(Icons.arrow_downward),
             ),
             _box,
-            Text("linear.x: " + node.controlLinearVel.toString()),
-            Text("angular.z: " + node.controlAngularVel.toString())
           ],
         ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
