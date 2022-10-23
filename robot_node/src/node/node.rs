@@ -1,26 +1,33 @@
 use flutter_rust_bridge::support::lazy_static;
+use std::thread;
+use zenoh::prelude::sync::*;
 
 use crate::node::comms::{Comms, Message};
 
 lazy_static! {
     static ref COMMUNICATOR: Comms = Comms::new();
+    static ref SESSION: Node = Node::new();
+}
+
+struct Node {
+    session: Session,
+}
+
+impl Node {
+    pub fn new() -> Self {
+        let config = zenoh::config::peer();
+        let session = zenoh::open(config).res().unwrap();
+
+        Node { session }
+    }
 }
 
 #[cfg(not(target_os = "android"))]
 pub fn init_node(url: String) {
-    use futures::executor;
-    use std::thread;
-    use zenoh::prelude::ZFuture;
-
-    let config = zenoh::config::peer();
-    let session = zenoh::open(config).wait().unwrap();
-
     thread::spawn(move || loop {
         let msg = COMMUNICATOR.receiver.lock().unwrap().recv().unwrap();
 
-        executor::block_on(async {
-            session.put(msg.topic, msg.data).await.unwrap();
-        });
+        SESSION.session.put(msg.topic, msg.data).res().unwrap();
     });
 }
 
@@ -41,9 +48,8 @@ mod tests {
 
     use super::publish_message;
     use cdr::{CdrLe, Infinite};
-    use futures::StreamExt;
     use rand::{thread_rng, Rng};
-    use zenoh::prelude::SplitBuffer;
+    use zenoh::prelude::r#async::*;
 
     fn create_test_data() -> Twist {
         let mut rng = thread_rng();
@@ -65,9 +71,9 @@ mod tests {
 
     #[async_std::test]
     async fn test_node_handle_valid() {
-        let session = zenoh::open(zenoh::config::peer()).await.unwrap();
+        let session = zenoh::open(zenoh::config::peer()).res().await.unwrap();
 
-        let mut subscriber = session.subscribe("/test").await.unwrap();
+        let subscriber = session.declare_subscriber("/test").res().await.unwrap();
 
         let twist = create_test_data();
 
@@ -80,7 +86,7 @@ mod tests {
             );
         });
 
-        let sample = subscriber.next().await.unwrap();
+        let sample = subscriber.recv().unwrap();
 
         let twist_reply = cdr::deserialize(&sample.value.payload.contiguous()).unwrap();
 
