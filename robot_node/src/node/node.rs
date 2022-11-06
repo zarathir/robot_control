@@ -6,7 +6,7 @@ use crate::node::comms::{Comms, Message};
 
 lazy_static! {
     static ref COMMUNICATOR: Comms = Comms::new();
-    static ref SESSION: Node = Node::new();
+    static ref NODE: Node = Node::new();
 }
 
 struct Node {
@@ -22,12 +22,11 @@ impl Node {
     }
 }
 
-#[cfg(not(target_os = "android"))]
 pub fn init_node(url: String) {
     thread::spawn(move || loop {
         let msg = COMMUNICATOR.receiver.lock().unwrap().recv().unwrap();
 
-        SESSION.session.put(msg.topic, msg.data).res().unwrap();
+        NODE.session.put(msg.topic, msg.data).res().unwrap();
     });
 }
 
@@ -44,44 +43,27 @@ pub fn publish_message(topic: String, data: Vec<u8>) {
 mod tests {
     use std::thread;
 
-    use crate::node::{init_node, msg::Twist, Vector3};
+    use crate::node::{init_node, Twist};
 
     use super::publish_message;
     use cdr::{CdrLe, Infinite};
     use rand::{thread_rng, Rng};
-    use zenoh::prelude::r#async::*;
+    use zenoh::prelude::r#sync::*;
 
-    fn create_test_data() -> Twist {
+    #[test]
+    fn test_node_handle_valid() {
+        let session = zenoh::open(zenoh::config::peer()).res().unwrap();
+
+        let subscriber = session.declare_subscriber("test").res().unwrap();
+
         let mut rng = thread_rng();
-
-        let linear = Vector3 {
-            x: rng.gen_range(-5.0..10.0),
-            y: 0.0,
-            z: 0.0,
-        };
-
-        let angular = Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: rng.gen_range(-5.0..10.0),
-        };
-
-        Twist { linear, angular }
-    }
-
-    #[async_std::test]
-    async fn test_node_handle_valid() {
-        let session = zenoh::open(zenoh::config::peer()).res().await.unwrap();
-
-        let subscriber = session.declare_subscriber("/test").res().await.unwrap();
-
-        let twist = create_test_data();
+        let twist = Twist::from_x_z(rng.gen_range(-5.0..10.0), rng.gen_range(-5.0..10.0));
 
         thread::spawn(move || {
             init_node("".to_string());
 
             publish_message(
-                "/test".to_string(),
+                "test".to_string(),
                 cdr::serialize::<_, _, CdrLe>(&twist, Infinite).unwrap(),
             );
         });

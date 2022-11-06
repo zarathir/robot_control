@@ -35,43 +35,27 @@ class RobotNodeImpl implements RobotNode {
         argNames: ["url"],
       );
 
-  Future<Uint8List?> generateTwist(
+  Future<void> publishMovement(
           {required String topic,
           required double x,
           required double z,
           dynamic hint}) =>
       _platform.executeNormal(FlutterRustBridgeTask(
-        callFfi: (port_) => _platform.inner.wire_generate_twist(port_,
+        callFfi: (port_) => _platform.inner.wire_publish_movement(port_,
             _platform.api2wire_String(topic), api2wire_f64(x), api2wire_f64(z)),
-        parseSuccessData: _wire2api_opt_ZeroCopyBuffer_Uint8List,
-        constMeta: kGenerateTwistConstMeta,
+        parseSuccessData: _wire2api_unit,
+        constMeta: kPublishMovementConstMeta,
         argValues: [topic, x, z],
         hint: hint,
       ));
 
-  FlutterRustBridgeTaskConstMeta get kGenerateTwistConstMeta =>
+  FlutterRustBridgeTaskConstMeta get kPublishMovementConstMeta =>
       const FlutterRustBridgeTaskConstMeta(
-        debugName: "generate_twist",
+        debugName: "publish_movement",
         argNames: ["topic", "x", "z"],
       );
 
 // Section: wire2api
-
-  Uint8List _wire2api_ZeroCopyBuffer_Uint8List(dynamic raw) {
-    return raw as Uint8List;
-  }
-
-  Uint8List? _wire2api_opt_ZeroCopyBuffer_Uint8List(dynamic raw) {
-    return raw == null ? null : _wire2api_ZeroCopyBuffer_Uint8List(raw);
-  }
-
-  int _wire2api_u8(dynamic raw) {
-    return raw as int;
-  }
-
-  Uint8List _wire2api_uint_8_list(dynamic raw) {
-    return raw as Uint8List;
-  }
 
   void _wire2api_unit(dynamic raw) {
     return;

@@ -1,5 +1,7 @@
-import 'package:robot_control/ffi.dart';
 import 'package:robot_control/teleop/teleoperation_interface.dart';
+
+import '../robot_node/ffi.dart'
+    if (dart.library.html) '../robot_node/ffi_web.dart';
 
 class TeleopZenoh implements TeleoperationInterface {
   String url;
@@ -8,11 +10,11 @@ class TeleopZenoh implements TeleoperationInterface {
 
   @override
   void init() {
-    api.nodeHandle(url: url);
+    robotNode.nodeHandle(url: url);
   }
 
   @override
-  Future<void> move(String topic, double x, double z, double speed) async {
-    await api.generateTwist(topic: topic, x: x, z: z);
+  Future<void> move(String topic, double x, double z) async {
+    await robotNode.publishMovement(topic: topic, x: x, z: z);
   }
 }

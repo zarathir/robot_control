@@ -41,7 +41,7 @@ class RobotNodeWasmModule implements WasmModule {
   external RobotNodeWasmModule bind(dynamic thisArg, String moduleName);
   external void wire_node_handle(NativePortType port_, String url);
 
-  external void wire_generate_twist(
+  external void wire_publish_movement(
       NativePortType port_, String topic, double x, double z);
 }
 
@@ -54,7 +54,7 @@ class RobotNodeWire extends FlutterRustBridgeWasmWireBase<RobotNodeWasmModule> {
   void wire_node_handle(NativePortType port_, String url) =>
       wasmModule.wire_node_handle(port_, url);
 
-  void wire_generate_twist(
+  void wire_publish_movement(
           NativePortType port_, String topic, double x, double z) =>
-      wasmModule.wire_generate_twist(port_, topic, x, z);
+      wasmModule.wire_publish_movement(port_, topic, x, z);
 }

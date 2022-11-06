@@ -9,11 +9,11 @@ pub struct Vector3 {
 }
 
 impl Vector3 {
-    fn from_x(x: f64) -> Self {
+    pub fn from_x(x: f64) -> Self {
         Vector3 { x, y: 0.0, z: 0.0 }
     }
 
-    fn from_z(z: f64) -> Self {
+    pub fn from_z(z: f64) -> Self {
         Vector3 { x: 0.0, y: 0.0, z }
     }
 }
@@ -26,7 +26,7 @@ pub struct Twist {
 }
 
 impl Twist {
-    pub fn from_x_z(x: f64, z: f64) -> Self {
+    pub fn from_x_z(x: f64, z: f64) -> Twist {
         Twist {
             linear: Vector3::from_x(x),
             angular: Vector3::from_z(z),
