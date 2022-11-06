@@ -4,9 +4,6 @@ class TeleopUtils {
   static const _turtlebotMaxLinVel = 0.22;
   static const _turtlebotMaxAngVel = 2.84;
 
-  static const _linearVelStepSize = 0.01;
-  static const _angularVelStepSize = 0.1;
-
   double makeSimpleProfile(double output, double input, double slop) {
     if (input > output) {
       output = min(input, output + slop);

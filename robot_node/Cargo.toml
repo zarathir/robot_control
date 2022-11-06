@@ -3,8 +3,6 @@ name = "robot_node"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 path = "src/lib.rs"
 crate-type = ["lib", "cdylib", "staticlib"]
@@ -17,10 +15,9 @@ serde = "1.0.136"
 serde_derive = "1.0.136"
 futures = "0.3.21"
 cfg-if = "1"
-zenoh = {version = "0.6.0-beta.1", default-features = false, features = ["transport_tcp"]}
+zenoh = { version = "0.6.0-beta.1", default-features = false, features = [
+    "transport_tcp",
+] }
 
 [dev-dependencies]
 rand = "0.8.5"
-async-std = { version = "=1.12.0", default-features = false, features = [
-    "attributes",
-] }

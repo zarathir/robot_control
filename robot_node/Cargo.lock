@@ -1286,7 +1286,6 @@ name = "robot_node"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "async-std",
  "cdr",
  "cfg-if",
  "flutter_rust_bridge",

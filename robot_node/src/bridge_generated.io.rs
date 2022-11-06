@@ -7,8 +7,8 @@ pub extern "C" fn wire_node_handle(port_: i64, url: *mut wire_uint_8_list) {
 }
 
 #[no_mangle]
-pub extern "C" fn wire_generate_twist(port_: i64, topic: *mut wire_uint_8_list, x: f64, z: f64) {
-    wire_generate_twist_impl(port_, topic, x, z)
+pub extern "C" fn wire_publish_movement(port_: i64, topic: *mut wire_uint_8_list, x: f64, z: f64) {
+    wire_publish_movement_impl(port_, topic, x, z)
 }
 
 // Section: allocate functions

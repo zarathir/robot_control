@@ -53,7 +53,7 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
       : _lookup = lookup;
 
   void store_dart_post_cobject(
-    int ptr,
+    DartPostCObjectFnType ptr,
   ) {
     return _store_dart_post_cobject(
       ptr,
@@ -61,10 +61,10 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
   }
 
   late final _store_dart_post_cobjectPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>(
+      _lookup<ffi.NativeFunction<ffi.Void Function(DartPostCObjectFnType)>>(
           'store_dart_post_cobject');
-  late final _store_dart_post_cobject =
-      _store_dart_post_cobjectPtr.asFunction<void Function(int)>();
+  late final _store_dart_post_cobject = _store_dart_post_cobjectPtr
+      .asFunction<void Function(DartPostCObjectFnType)>();
 
   void wire_node_handle(
     int port_,
@@ -83,13 +83,13 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
   late final _wire_node_handle = _wire_node_handlePtr
       .asFunction<void Function(int, ffi.Pointer<wire_uint_8_list>)>();
 
-  void wire_generate_twist(
+  void wire_publish_movement(
     int port_,
     ffi.Pointer<wire_uint_8_list> topic,
     double x,
     double z,
   ) {
-    return _wire_generate_twist(
+    return _wire_publish_movement(
       port_,
       topic,
       x,
@@ -97,11 +97,11 @@ class RobotNodeWire implements FlutterRustBridgeWireBase {
     );
   }
 
-  late final _wire_generate_twistPtr = _lookup<
+  late final _wire_publish_movementPtr = _lookup<
       ffi.NativeFunction<
           ffi.Void Function(ffi.Int64, ffi.Pointer<wire_uint_8_list>,
-              ffi.Double, ffi.Double)>>('wire_generate_twist');
-  late final _wire_generate_twist = _wire_generate_twistPtr.asFunction<
+              ffi.Double, ffi.Double)>>('wire_publish_movement');
+  late final _wire_publish_movement = _wire_publish_movementPtr.asFunction<
       void Function(int, ffi.Pointer<wire_uint_8_list>, double, double)>();
 
   ffi.Pointer<wire_uint_8_list> new_uint_8_list_0(
@@ -141,4 +141,6 @@ class wire_uint_8_list extends ffi.Struct {
   external int len;
 }
 
-typedef bool = ffi.NativeFunction<ffi.Int Function(ffi.Pointer<ffi.Int>)>;
+typedef DartPostCObjectFnType = ffi.Pointer<
+    ffi.NativeFunction<ffi.Bool Function(DartPort, ffi.Pointer<ffi.Void>)>>;
+typedef DartPort = ffi.Int64;

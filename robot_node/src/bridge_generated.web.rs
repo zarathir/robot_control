@@ -7,8 +7,8 @@ pub fn wire_node_handle(port_: MessagePort, url: String) {
 }
 
 #[wasm_bindgen]
-pub fn wire_generate_twist(port_: MessagePort, topic: String, x: f64, z: f64) {
-    wire_generate_twist_impl(port_, topic, x, z)
+pub fn wire_publish_movement(port_: MessagePort, topic: String, x: f64, z: f64) {
+    wire_publish_movement_impl(port_, topic, x, z)
 }
 
 // Section: allocate functions

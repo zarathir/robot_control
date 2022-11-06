@@ -11,11 +11,11 @@ abstract class RobotNode {
 
   FlutterRustBridgeTaskConstMeta get kNodeHandleConstMeta;
 
-  Future<Uint8List?> generateTwist(
+  Future<void> publishMovement(
       {required String topic,
       required double x,
       required double z,
       dynamic hint});
 
-  FlutterRustBridgeTaskConstMeta get kGenerateTwistConstMeta;
+  FlutterRustBridgeTaskConstMeta get kPublishMovementConstMeta;
 }

@@ -32,7 +32,7 @@ fn wire_node_handle_impl(port_: MessagePort, url: impl Wire2Api<String> + Unwind
         },
     )
 }
-fn wire_generate_twist_impl(
+fn wire_publish_movement_impl(
     port_: MessagePort,
     topic: impl Wire2Api<String> + UnwindSafe,
     x: impl Wire2Api<f64> + UnwindSafe,
@@ -40,7 +40,7 @@ fn wire_generate_twist_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap(
         WrapInfo {
-            debug_name: "generate_twist",
+            debug_name: "publish_movement",
             port: Some(port_),
             mode: FfiCallMode::Normal,
         },
@@ -48,7 +48,7 @@ fn wire_generate_twist_impl(
             let api_topic = topic.wire2api();
             let api_x = x.wire2api();
             let api_z = z.wire2api();
-            move |task_callback| Ok(generate_twist(api_topic, api_x, api_z))
+            move |task_callback| Ok(publish_movement(api_topic, api_x, api_z))
         },
     )
 }
