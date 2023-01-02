@@ -82,15 +82,15 @@ dependencies {
     tasks.register("cargoBuild$taskPostfix", Exec) {
         workingDir "../../robot_node"
         environment ANDROID_NDK_HOME: "$ANDROID_NDK"
-        commandLine 'cargo', 'ndk',
+        commandLine 'cross', 'build',
                 // the 2 ABIs below are used by real Android devices
-                '-t', 'armeabi-v7a',
-                '-t', 'arm64-v8a',
+                '-t', 'aarch64-linux-android',
+                '-t', 'armv7-linux-androideabi',
                 // the below 2 ABIs are usually used for Android simulators,
                 // add or remove these ABIs as needed.
-                '-t', 'x86',
-                '-t', 'x86_64',
-                '-o', '../android/app/src/main/jniLibs', 'build'
+                '-t', 'x86_64-linux-android',
+                '-t', 'i686-linux-android',
+                //'-o', '../android/app/src/main/jniLibs', 'build'
         if (profileMode != null) {
             args profileMode
         }
